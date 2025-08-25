@@ -1,0 +1,17 @@
+{
+  "name": "@test-monorepo/ui",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@test-monorepo/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "workspace:*"
+  }
+}

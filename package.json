@@ -1,0 +1,69 @@
+{
+  "name": "move-ts-file",
+  "version": "0.1.0",
+  "description": "Intelligent CLI tool to move TypeScript files and automatically update all import paths throughout your project",
+  "type": "module",
+  "main": "bin/move-ts-file.js",
+  "types": "dist/move-ts.d.ts",
+  "bin": {
+    "move-ts-file": "./bin/move-ts-file.js"
+  },
+  "scripts": {
+    "build": "bun build move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
+    "generate-types": "bun tsc --project tsconfig.json --emitDeclarationOnly",
+    "test": "bun test test/specs/",
+    "test:watch": "bun test --watch test/specs/",
+    "format": "dprint fmt",
+    "format:check": "dprint check",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "bun tsc --noEmit",
+    "prepack": "bun run typecheck && bun run lint && bun run format:check && bun run test && bun run build"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "README.md",
+    "CLAUDE.md"
+  ],
+  "dependencies": {
+    "glob": "^10.3.10",
+    "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.2",
+    "@types/node": "^20.10.6",
+    "dprint": "^0.50.1"
+  },
+  "keywords": [
+    "typescript",
+    "refactor",
+    "imports",
+    "move",
+    "cli",
+    "ast",
+    "code-generation",
+    "developer-tools",
+    "ai-agents",
+    "claude-code",
+    "monorepo",
+    "tsconfig-paths"
+  ],
+  "author": {
+    "name": "Saulo Vallory",
+    "url": "https://saulo.engineer"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SubtleTools/move-ts-file.git"
+  },
+  "homepage": "https://github.com/SubtleTools/move-ts-file#readme",
+  "bugs": {
+    "url": "https://github.com/SubtleTools/move-ts-file/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
+  }
+}

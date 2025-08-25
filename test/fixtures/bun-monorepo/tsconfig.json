@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@test-monorepo/core": ["./packages/core/src/index.ts"],
+      "@test-monorepo/core/*": ["./packages/core/src/*"],
+      "@test-monorepo/ui": ["./packages/ui/src/index.ts"],
+      "@test-monorepo/ui/*": ["./packages/ui/src/*"],
+      "@test-monorepo/api": ["./packages/api/src/index.ts"],
+      "@test-monorepo/api/*": ["./packages/api/src/*"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*",
+    "apps/*/src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/dist",
+    "**/build"
+  ]
+}

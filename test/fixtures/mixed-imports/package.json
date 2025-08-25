@@ -1,0 +1,9 @@
+{
+  "name": "mixed-imports-test",
+  "version": "1.0.0",
+  "type": "module",
+  "imports": {
+    "#lib/*": "./lib/*.js",
+    "#shared": "./src/core/shared.js"
+  }
+}

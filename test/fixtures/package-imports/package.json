@@ -1,0 +1,17 @@
+{
+  "name": "package-imports-test",
+  "version": "1.0.0",
+  "type": "module",
+  "imports": {
+    "#utils/*": "./src/shared/utils/*.js",
+    "#types": "./src/shared/types/index.js",
+    "#config": "./src/shared/config.js",
+    "#internal/*": "./internal/*.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  }
+}
