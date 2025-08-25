@@ -14,35 +14,25 @@ hero:
       icon: external
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
-
 ## What makes move-ts-file special?
 
-<CardGrid stagger>
-  <Card title="🎯 Import Style Preservation" icon="star">
-    Maintains your existing import patterns instead of forcing you to adopt a specific style. Whether you use relative imports, path mappings, or workspace imports, move-ts-file preserves your choices.
-  </Card>
+### 🎯 Import Style Preservation
+Maintains your existing import patterns instead of forcing you to adopt a specific style. Whether you use relative imports, path mappings, or workspace imports, move-ts-file preserves your choices.
 
-<Card title="📦 Monorepo Native" icon="open-book">
-    Built from the ground up to handle complex monorepo structures with workspace dependencies, cross-package imports, and scoped packages.
-  </Card>
+### 📦 Monorepo Native
+Built from the ground up to handle complex monorepo structures with workspace dependencies, cross-package imports, and scoped packages.
 
-<Card title="🤖 AI-Assisted Development" icon="puzzle">
-    Designed specifically for AI agents and modern development workflows. Includes comprehensive Claude Code integration with custom commands.
-  </Card>
+### 🤖 AI-Assisted Development
+Designed specifically for AI agents and modern development workflows. Includes comprehensive Claude Code integration with custom commands.
 
-<Card title="🔄 Barrel Export Management" icon="setting">
-    Automatically detects and updates barrel files (index.ts re-exports) when files are moved, ensuring your module structure stays intact.
-  </Card>
+### 🔄 Barrel Export Management
+Automatically detects and updates barrel files (index.ts re-exports) when files are moved, ensuring your module structure stays intact.
 
-<Card title="⚡ Zero Configuration" icon="rocket">
-    Works out of the box with any TypeScript project. No complex configuration files or setup required.
-  </Card>
+### ⚡ Zero Configuration
+Works out of the box with any TypeScript project. No complex configuration files or setup required.
 
-<Card title="🧪 Battle-Tested" icon="approve-check">
-    Comprehensive test suite with 43+ tests covering edge cases, monorepo scenarios, and complex import patterns.
-  </Card>
-</CardGrid>
+### 🧪 Battle-Tested
+Comprehensive test suite with 47+ tests covering edge cases, monorepo scenarios, and complex import patterns.
 
 ## Quick Example
 

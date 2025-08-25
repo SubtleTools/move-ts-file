@@ -18,11 +18,14 @@ When refactoring TypeScript projects—whether manually or with AI assistance—
 
 ### Perfect for AI-Assisted Development
 
-AI coding assistants like **Claude Code** excel at understanding code structure and suggesting refactoring, but they often struggle with the tedious task of updating import paths when files are moved. This tool bridges that gap:
+AI coding assistants like **Claude Code** excel at understanding code structure and suggesting refactoring. When you ask an AI to refactor your code, it can use this tool directly to move files while preserving all import paths:
 
-- **AI suggests** → "Move this component to a shared directory"
-- **You execute** → `move-ts-file src/components/Button.tsx shared/ui/Button.tsx`
-- **Tool handles** → All import updates across your entire codebase
+- **You request** → "Refactor this code to use feature-based architecture"
+- **AI analyzes** → Identifies which files should be moved and where
+- **AI executes** → `move-ts-file src/components/Button.tsx src/features/ui/Button.tsx`
+- **AI continues** → With confident refactoring, knowing imports are automatically updated
+
+This reduces iterations and context usage, as the AI doesn't need to manually update dozens of import statements across your codebase.
 
 ## 📦 Installation
 
@@ -265,21 +268,27 @@ move-ts-file src/Button.tsx src/shared/Button.tsx --no-update-barrels
 
 ### Claude Code Integration
 
-This tool is specifically designed to work seamlessly with AI coding assistants. Here's how to use it with Claude Code:
+This tool is specifically designed to work seamlessly with AI coding assistants. Here's how it works with Claude Code:
 
-1. **Ask Claude to analyze** your codebase and suggest refactoring
-2. **Ask Claude to identify** which files should be moved
-3. **Use this tool** to execute the moves with confidence
-4. **Let Claude continue** with the refactoring, knowing imports are correct
+1. **You request** a refactoring task from Claude
+2. **Claude analyzes** your codebase and plans the refactoring
+3. **Claude executes** `move-ts-file` commands to move files safely
+4. **Claude continues** with additional changes, confident that imports are correct
 
 **Example workflow:**
 
 ```
 You: "I want to reorganize my components into feature-based directories"
-Claude: "I recommend moving Button.tsx to features/ui/Button.tsx"
-You: move-ts-file src/components/Button.tsx src/features/ui/Button.tsx
-Claude: "Great! Now let's move the related hook..."
+Claude: "I'll help you refactor this. Let me start by moving the Button component:"
+Claude: [executes] move-ts-file src/components/Button.tsx src/features/ui/Button.tsx
+Claude: "Great! Now I'll move the related hook and update the exports..."
+Claude: [executes] move-ts-file src/hooks/useButton.ts src/features/ui/hooks/useButton.ts
 ```
+
+**Benefits for AI workflows:**
+- **Reduced iterations**: AI doesn't waste tokens manually updating imports
+- **Higher confidence**: AI can focus on architecture, not tedious path updates
+- **Faster completion**: Complex refactoring tasks finish in fewer interactions
 
 ### Integration with Other Tools
 

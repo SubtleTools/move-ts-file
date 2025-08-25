@@ -6,8 +6,9 @@ import starlightImageZoom from 'starlight-image-zoom';
 export default defineConfig({
   srcDir: './docs',
   outDir: './dist-docs',
-  site: 'https://subtletools.github.io',
-  base: '/move-ts-file',
+  publicDir: './docs/public',
+  site: 'https://move-ts-file.saulo.engineer',
+  base: '/',
   integrations: [
     starlight({
       plugins: [
@@ -83,14 +84,14 @@ export default defineConfig({
           tag: 'meta',
           attrs: {
             property: 'og:image',
-            content: 'https://subtletools.github.io/move-ts-file/og-image.png',
+            content: 'https://move-ts-file.saulo.engineer/og-image.png',
           },
         },
         {
           tag: 'meta',
           attrs: {
             name: 'twitter:image',
-            content: 'https://subtletools.github.io/move-ts-file/og-image.png',
+            content: 'https://move-ts-file.saulo.engineer/og-image.png',
           },
         },
       ],
