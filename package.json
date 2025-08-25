@@ -1,6 +1,6 @@
 {
   "name": "move-ts-file",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Intelligent CLI tool to move TypeScript files and automatically update all import paths throughout your project",
   "type": "module",
   "main": "dist/move-ts.js",
@@ -27,8 +27,7 @@
   "files": [
     "bin/",
     "dist/",
-    "README.md",
-    "CLAUDE.md"
+    "README.md"
   ],
   "dependencies": {
     "glob": "^10.3.10",

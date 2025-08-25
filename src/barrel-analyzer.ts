@@ -1,3 +1,4 @@
+import { glob } from 'glob';
 import { existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { ExportDeclaration, Project, SourceFile, SyntaxKind } from 'ts-morph';
@@ -33,11 +34,11 @@ export class BarrelAnalyzer {
 
     this.project = new Project({
       ...(hasTsConfig && { tsConfigFilePath: tsConfigPath }),
-      skipAddingFilesFromTsConfig: true, // We'll add files manually
+      skipAddingFilesFromTsConfig: true, // We'll add files on-demand
+      skipFileDependencyResolution: true, // Skip dependency resolution for performance
     });
 
-    // Add all TypeScript files in the project
-    this.project.addSourceFilesAtPaths(`${projectRoot}/**/*.{ts,tsx}`);
+    // Don't load all files at once - load on-demand instead
   }
 
   /**
@@ -51,19 +52,31 @@ export class BarrelAnalyzer {
     const affectedBarrels: BarrelExport[] = [];
     const transitiveImports: string[] = [];
 
-    // Find all files that re-export from the source file
-    const sourceFiles = this.project.getSourceFiles();
+    // Find all TypeScript files in the project using glob (memory efficient)
+    const files = await glob('**/*.{ts,tsx}', {
+      cwd: this.projectRoot,
+      ignore: '**/node_modules/**',
+      absolute: true,
+    });
 
-    for (const sourceFile of sourceFiles) {
+    // Process each file on-demand instead of loading all at once
+    for (const filePath of files) {
+      if (filePath === sourcePath) continue;
+
+      // Load this file individually and check if it has barrel exports
+      const sourceFile = this.project.addSourceFileAtPath(filePath);
       const barrelExports = this.findBarrelExports(sourceFile, sourcePath);
 
       if (barrelExports.length > 0) {
         affectedBarrels.push(...barrelExports);
 
         // Find files that import from this barrel
-        const barrelImports = await this.findBarrelImports(sourceFile.getFilePath());
+        const barrelImports = await this.findBarrelImports(filePath);
         transitiveImports.push(...barrelImports);
       }
+
+      // Remove the file from memory after processing to prevent memory buildup
+      this.project.removeSourceFile(sourceFile);
     }
 
     return {
@@ -126,11 +139,20 @@ export class BarrelAnalyzer {
    */
   private async findBarrelImports(barrelFilePath: string): Promise<string[]> {
     const imports: string[] = [];
-    const sourceFiles = this.project.getSourceFiles();
 
-    for (const sourceFile of sourceFiles) {
-      const filePath = sourceFile.getFilePath();
+    // Find all TypeScript files using glob (memory efficient)
+    const files = await glob('**/*.{ts,tsx}', {
+      cwd: this.projectRoot,
+      ignore: '**/node_modules/**',
+      absolute: true,
+    });
+
+    // Process each file on-demand to check if it imports from the barrel
+    for (const filePath of files) {
       if (filePath === barrelFilePath) continue;
+
+      // Load this file individually to check imports
+      const sourceFile = this.project.addSourceFileAtPath(filePath);
 
       // Check all import declarations
       const importDeclarations = sourceFile.getImportDeclarations();
@@ -146,6 +168,9 @@ export class BarrelAnalyzer {
           break; // Found one import from this file, no need to check more
         }
       }
+
+      // Remove the file from memory after processing
+      this.project.removeSourceFile(sourceFile);
     }
 
     return imports;
@@ -169,11 +194,15 @@ export class BarrelAnalyzer {
    * ```
    */
   async updateBarrelExports(barrelExports: BarrelExport[], newPath: string): Promise<void> {
-    const updatedFiles = new Set<string>();
+    const updatedFiles = new Map<string, SourceFile>();
 
     for (const barrelExport of barrelExports) {
-      const sourceFile = this.project.getSourceFile(barrelExport.filePath);
-      if (!sourceFile) continue;
+      // Load the file on-demand if not already loaded for this update cycle
+      let sourceFile = updatedFiles.get(barrelExport.filePath);
+      if (!sourceFile) {
+        sourceFile = this.project.addSourceFileAtPath(barrelExport.filePath);
+        updatedFiles.set(barrelExport.filePath, sourceFile);
+      }
 
       // Calculate new module specifier for the moved file
       const newModuleSpecifier = this.calculateNewModuleSpecifier(
@@ -182,18 +211,23 @@ export class BarrelAnalyzer {
         newPath,
       );
 
-      // Update the export declaration
-      barrelExport.exportDeclarationNode.setModuleSpecifier(newModuleSpecifier);
-      updatedFiles.add(barrelExport.filePath);
+      // Find and update the export declaration
+      const exportDeclarations = sourceFile.getExportDeclarations();
+      for (const exportDecl of exportDeclarations) {
+        if (exportDecl.getModuleSpecifierValue() === barrelExport.moduleSpecifier) {
+          exportDecl.setModuleSpecifier(newModuleSpecifier);
+          break;
+        }
+      }
     }
 
-    // Save all updated files
-    for (const filePath of updatedFiles) {
-      const sourceFile = this.project.getSourceFile(filePath);
-      if (sourceFile) {
-        await sourceFile.save();
-        console.log(`Updated barrel exports in: ${relative(this.projectRoot, filePath)}`);
-      }
+    // Save all updated files and remove them from memory
+    for (const [filePath, sourceFile] of updatedFiles) {
+      await sourceFile.save();
+      console.log(`Updated barrel exports in: ${relative(this.projectRoot, filePath)}`);
+
+      // Remove the file from memory after saving
+      this.project.removeSourceFile(sourceFile);
     }
   }
 

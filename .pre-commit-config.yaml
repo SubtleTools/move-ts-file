@@ -1,0 +1,44 @@
+repos:
+  # Format code with dprint
+  - repo: local
+    hooks:
+      - id: dprint-check
+        name: dprint format check
+        entry: bun run format:check
+        language: system
+        files: \.(ts|tsx|js|jsx|json|md)$
+        pass_filenames: false
+
+  # Lint code with Biome
+  - repo: local
+    hooks:
+      - id: biome-check
+        name: biome lint check
+        entry: bun run lint
+        language: system
+        files: \.(ts|tsx|js|jsx|json)$
+        pass_filenames: false
+
+  # Type check with TypeScript
+  - repo: local
+    hooks:
+      - id: typescript-check
+        name: typescript type check
+        entry: bun run typecheck
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+
+  # Run tests when TypeScript files change
+  - repo: local
+    hooks:
+      - id: tests
+        name: run tests
+        entry: bun test
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames: false
+
+# Global configuration
+fail_fast: true
+default_stages: [pre-commit]

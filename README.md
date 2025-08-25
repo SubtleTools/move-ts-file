@@ -106,6 +106,7 @@ export { validateEmail } from './validation.js'; // ✅ Unchanged
 ```
 
 **What this means:**
+
 - Components importing from barrels (`import { User } from './utils'`) continue to work unchanged
 - The barrel file acts as a stable API, hiding internal reorganization
 - No need to update dozens of files that import from the barrel
@@ -298,6 +299,7 @@ Claude: [executes] move-ts-file src/hooks/useButton.ts src/features/ui/hooks/use
 ```
 
 **Benefits for AI workflows:**
+
 - **Reduced iterations**: AI doesn't waste tokens manually updating imports
 - **Higher confidence**: AI can focus on architecture, not tedious path updates
 - **Faster completion**: Complex refactoring tasks finish in fewer interactions
@@ -359,6 +361,62 @@ Successfully moved file and updated 5 files with import changes
 - Does not handle dynamic imports (`import()`) or `require()`
 - Requires valid TypeScript syntax for parsing
 - Does not update comments or documentation references
+
+## 🛠️ Development
+
+### Prerequisites
+
+- **Bun** (recommended) or Node.js 18+
+- **Python 3.7+** (for pre-commit hooks)
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/SubtleTools/move-ts-file.git
+cd move-ts-file
+
+# Install dependencies
+bun install
+
+# Install pre-commit hooks (optional but recommended)
+pip install pre-commit
+pre-commit install
+```
+
+### Available Scripts
+
+```bash
+# Development
+bun run build          # Build the project
+bun run test           # Run tests
+bun run test:watch     # Run tests in watch mode
+
+# Code Quality
+bun run lint           # Run Biome linter
+bun run lint:fix       # Fix linting issues
+bun run format         # Format with dprint
+bun run format:check   # Check formatting
+bun run typecheck      # Run TypeScript checks
+
+# Pre-publish checks
+bun run prepack        # Run all quality checks
+```
+
+### Pre-commit Hooks
+
+This project uses pre-commit hooks to ensure code quality:
+
+- **dprint**: Code formatting (TypeScript, JSON, Markdown)
+- **Biome**: Linting and additional formatting
+- **TypeScript**: Type checking
+- **Tests**: Run test suite
+
+The hooks run automatically on commit, but you can run them manually:
+
+```bash
+pre-commit run --all-files
+```
 
 ## 🤝 Contributing
 

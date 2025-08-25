@@ -1,3 +1,4 @@
+import { glob } from 'glob';
 import { existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { ExportDeclaration, ImportDeclaration, Project, SourceFile, SyntaxKind } from 'ts-morph';
@@ -55,23 +56,23 @@ export class RecursiveBarrelAnalyzer {
 
   constructor(projectRoot: string = process.cwd()) {
     this.projectRoot = projectRoot;
-    
+
     const tsConfigPath = resolve(projectRoot, 'tsconfig.json');
     const hasTsConfig = existsSync(tsConfigPath);
 
     this.project = new Project({
       ...(hasTsConfig && { tsConfigFilePath: tsConfigPath }),
       skipAddingFilesFromTsConfig: true,
+      skipFileDependencyResolution: true, // Skip dependency resolution for performance
     });
 
-    // Add all TypeScript files in the project
-    this.project.addSourceFilesAtPaths(`${projectRoot}/**/*.{ts,tsx}`);
+    // Don't load all files at once - load on-demand instead
   }
 
   /**
    * Builds a complete dependency graph of all barrel relationships in the project
    */
-  private buildDependencyGraph(): BarrelDependencyGraph {
+  private async buildDependencyGraph(): Promise<BarrelDependencyGraph> {
     if (this.dependencyGraph) {
       return this.dependencyGraph;
     }
@@ -82,11 +83,17 @@ export class RecursiveBarrelAnalyzer {
       barrelFiles: new Set(),
     };
 
-    const sourceFiles = this.project.getSourceFiles();
+    // Find all TypeScript files using glob (memory efficient)
+    const files = await glob('**/*.{ts,tsx}', {
+      cwd: this.projectRoot,
+      ignore: '**/node_modules/**',
+      absolute: true,
+    });
 
     // First pass: identify all barrel files and their direct re-exports
-    for (const sourceFile of sourceFiles) {
-      const filePath = sourceFile.getFilePath();
+    for (const filePath of files) {
+      // Load this file individually
+      const sourceFile = this.project.addSourceFileAtPath(filePath);
       const exportDeclarations = sourceFile.getExportDeclarations();
 
       if (exportDeclarations.length > 0) {
@@ -110,8 +117,8 @@ export class RecursiveBarrelAnalyzer {
             exportStatement: exportDecl.getText(),
             moduleSpecifier,
             exportType: exportDecl.isNamespaceExport() ? 'star' : 'named',
-            namedExports: exportDecl.isNamespaceExport() 
-              ? undefined 
+            namedExports: exportDecl.isNamespaceExport()
+              ? undefined
               : exportDecl.getNamedExports().map(exp => exp.getName()),
           };
 
@@ -126,6 +133,9 @@ export class RecursiveBarrelAnalyzer {
           graph.barrelFiles.add(filePath);
         }
       }
+
+      // Remove the file from memory after processing
+      this.project.removeSourceFile(sourceFile);
     }
 
     // Second pass: build barrel -> parent barrel relationships
@@ -143,9 +153,9 @@ export class RecursiveBarrelAnalyzer {
   /**
    * Analyzes what needs to change when moving a file between barrel hierarchies
    */
-  analyzeBarrelMove(sourcePath: string, destPath: string): BarrelMoveResult {
-    const graph = this.buildDependencyGraph();
-    
+  async analyzeBarrelMove(sourcePath: string, destPath: string): Promise<BarrelMoveResult> {
+    const graph = await this.buildDependencyGraph();
+
     const result: BarrelMoveResult = {
       removedReexports: [],
       addedReexports: [],
@@ -159,7 +169,7 @@ export class RecursiveBarrelAnalyzer {
 
     // Step 2: Determine new barrel location
     const newBarrelPath = this.findNearestBarrel(destPath);
-    
+
     // Step 3: Create new re-exports for the new location
     if (newBarrelPath) {
       for (const oldReexport of affectedBarrels) {
@@ -174,11 +184,11 @@ export class RecursiveBarrelAnalyzer {
     }
 
     // Step 4: Find all imports that consume from these barrels and update them
-    result.importUpdates = this.findAndUpdateBarrelConsumers(
-      affectedBarrels, 
-      sourcePath, 
-      destPath, 
-      newBarrelPath
+    result.importUpdates = await this.findAndUpdateBarrelConsumers(
+      affectedBarrels,
+      sourcePath,
+      destPath,
+      newBarrelPath,
     );
 
     // Step 5: Collect all files that will be modified
@@ -248,20 +258,28 @@ export class RecursiveBarrelAnalyzer {
   /**
    * Finds all files that import from the affected barrels and determines how to update them
    */
-  private findAndUpdateBarrelConsumers(
+  private async findAndUpdateBarrelConsumers(
     affectedBarrels: BarrelReexport[],
     sourcePath: string,
     destPath: string,
-    newBarrelPath: string | null
-  ) {
+    newBarrelPath: string | null,
+  ): Promise<BarrelMoveResult['importUpdates']> {
     const updates: BarrelMoveResult['importUpdates'] = [];
-    const sourceFiles = this.project.getSourceFiles();
-    
+
     // Get exports from the moved file to know what to look for
     const movedFileExports = this.getFileExports(sourcePath);
 
-    for (const sourceFile of sourceFiles) {
-      const filePath = sourceFile.getFilePath();
+    // Find all TypeScript files using glob (memory efficient)
+    const files = await glob('**/*.{ts,tsx}', {
+      cwd: this.projectRoot,
+      ignore: '**/node_modules/**',
+      absolute: true,
+    });
+
+    // Process each file on-demand to check if it imports from affected barrels
+    for (const filePath of files) {
+      // Load this file individually
+      const sourceFile = this.project.addSourceFileAtPath(filePath);
       const importDeclarations = sourceFile.getImportDeclarations();
 
       for (const importDecl of importDeclarations) {
@@ -269,21 +287,19 @@ export class RecursiveBarrelAnalyzer {
         const resolvedImportPath = this.resolveModuleSpecifier(moduleSpecifier, filePath);
 
         // Check if this import is from one of the affected barrels
-        const affectedBarrel = affectedBarrels.find(barrel => 
-          this.normalizePathForMatching(resolvedImportPath) === 
-          this.normalizePathForMatching(barrel.barrelFile)
+        const affectedBarrel = affectedBarrels.find(barrel =>
+          this.normalizePathForMatching(resolvedImportPath)
+            === this.normalizePathForMatching(barrel.barrelFile)
         );
 
         if (affectedBarrel) {
           // This import is from an affected barrel
           const importedNames = this.getImportedNames(importDecl);
-          const importsFromMovedFile = importedNames.filter(name =>
-            movedFileExports.includes(name)
-          );
+          const importsFromMovedFile = importedNames.filter(name => movedFileExports.includes(name));
 
           if (importsFromMovedFile.length > 0) {
             // This import uses exports from the moved file
-            const newImportPath = newBarrelPath 
+            const newImportPath = newBarrelPath
               ? this.calculateRelativeModuleSpecifier(filePath, newBarrelPath)
               : this.calculateRelativeModuleSpecifier(filePath, destPath);
 
@@ -296,6 +312,9 @@ export class RecursiveBarrelAnalyzer {
           }
         }
       }
+
+      // Remove the file from memory after processing
+      this.project.removeSourceFile(sourceFile);
     }
 
     return updates;
@@ -309,7 +328,7 @@ export class RecursiveBarrelAnalyzer {
     if (!sourceFile) return [];
 
     const exports: string[] = [];
-    
+
     // Get named exports
     const exportDeclarations = sourceFile.getExportDeclarations();
     for (const exportDecl of exportDeclarations) {
@@ -338,7 +357,7 @@ export class RecursiveBarrelAnalyzer {
    */
   private getImportedNames(importDecl: ImportDeclaration): string[] {
     const names: string[] = [];
-    
+
     // Named imports
     const namedImports = importDecl.getNamedImports();
     for (const namedImport of namedImports) {
@@ -368,7 +387,7 @@ export class RecursiveBarrelAnalyzer {
   private createNewImportStatement(
     originalImport: ImportDeclaration,
     importsFromMovedFile: string[],
-    newModulePath: string
+    newModulePath: string,
   ): string {
     // For now, create a simple named import
     // TODO: Handle default imports, namespace imports, etc.
@@ -381,10 +400,10 @@ export class RecursiveBarrelAnalyzer {
    */
   private calculateRelativeModuleSpecifier(fromFile: string, toFile: string): string {
     let relativePath = relative(dirname(fromFile), toFile);
-    
+
     // Remove file extension
     relativePath = relativePath.replace(/\.(ts|tsx|js|jsx)$/, '');
-    
+
     // Ensure it starts with './' if it's in the same directory or subdirectory
     if (!relativePath.startsWith('.')) {
       relativePath = './' + relativePath;

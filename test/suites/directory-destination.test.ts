@@ -28,13 +28,13 @@ describe('Directory Destination Support', () => {
       join(tempFixturePath, sourceFile),
       `export const DiagramEditorOrchestrator = () => {
   return <div>Complex editor</div>;
-};`
+};`,
     );
 
     // Create package.json
     await writeFile(
       join(tempFixturePath, 'package.json'),
-      JSON.stringify({ name: 'test-project', version: '1.0.0' })
+      JSON.stringify({ name: 'test-project', version: '1.0.0' }),
     );
 
     const mover = new TypeScriptFileMover(tempFixturePath);
@@ -45,7 +45,7 @@ describe('Directory Destination Support', () => {
 
     // Verify source file was moved
     expect(existsSync(join(tempFixturePath, sourceFile))).toBe(false);
-    
+
     // Verify file exists in destination directory with same filename
     const expectedDestination = 'components/diagram-editor-orchestrator-complex.tsx';
     expect(existsSync(join(tempFixturePath, expectedDestination))).toBe(true);
@@ -62,13 +62,13 @@ describe('Directory Destination Support', () => {
       join(tempFixturePath, sourceFile),
       `export const MyComponent = () => {
   return <div>My component</div>;
-};`
+};`,
     );
 
     // Create package.json
     await writeFile(
       join(tempFixturePath, 'package.json'),
-      JSON.stringify({ name: 'test-project', version: '1.0.0' })
+      JSON.stringify({ name: 'test-project', version: '1.0.0' }),
     );
 
     const mover = new TypeScriptFileMover(tempFixturePath);
@@ -79,7 +79,7 @@ describe('Directory Destination Support', () => {
 
     // Verify source file was moved
     expect(existsSync(join(tempFixturePath, sourceFile))).toBe(false);
-    
+
     // Verify file exists in destination directory with same filename
     const expectedDestination = 'shared/my-component.tsx';
     expect(existsSync(join(tempFixturePath, expectedDestination))).toBe(true);
@@ -96,13 +96,13 @@ describe('Directory Destination Support', () => {
       join(tempFixturePath, sourceFile),
       `export const utility = () => {
   return 'helper';
-};`
+};`,
     );
 
     // Create package.json
     await writeFile(
       join(tempFixturePath, 'package.json'),
-      JSON.stringify({ name: 'test-project', version: '1.0.0' })
+      JSON.stringify({ name: 'test-project', version: '1.0.0' }),
     );
 
     const mover = new TypeScriptFileMover(tempFixturePath);
@@ -113,7 +113,7 @@ describe('Directory Destination Support', () => {
 
     // Verify source file was moved
     expect(existsSync(join(tempFixturePath, sourceFile))).toBe(false);
-    
+
     // Verify file exists in nested destination directory with same filename
     const expectedDestination = 'components/shared/utils/utils.ts';
     expect(existsSync(join(tempFixturePath, expectedDestination))).toBe(true);
@@ -130,13 +130,13 @@ describe('Directory Destination Support', () => {
       join(tempFixturePath, sourceFile),
       `export const Button = () => {
   return <button>Click me</button>;
-};`
+};`,
     );
 
     // Create package.json
     await writeFile(
       join(tempFixturePath, 'package.json'),
-      JSON.stringify({ name: 'test-project', version: '1.0.0' })
+      JSON.stringify({ name: 'test-project', version: '1.0.0' }),
     );
 
     const mover = new TypeScriptFileMover(tempFixturePath);
@@ -148,7 +148,7 @@ describe('Directory Destination Support', () => {
 
     // Verify source file was moved
     expect(existsSync(join(tempFixturePath, sourceFile))).toBe(false);
-    
+
     // Verify file exists in absolute destination directory with same filename
     const expectedDestination = join(absoluteDestDir, 'button.tsx');
     expect(existsSync(expectedDestination)).toBe(true);
