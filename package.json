@@ -9,7 +9,7 @@
     "move-ts-file": "./bin/move-ts-file.js"
   },
   "scripts": {
-    "build": "bun build src/move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
+    "build": "bun run generate-types",
     "build:docs": "astro build",
     "dev:docs": "astro dev",
     "preview:docs": "astro preview",
