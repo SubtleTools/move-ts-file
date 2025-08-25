@@ -1,6 +1,6 @@
 {
   "name": "move-ts-file",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Intelligent CLI tool to move TypeScript files and automatically update all import paths throughout your project",
   "type": "module",
   "main": "dist/move-ts.js",
