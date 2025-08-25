@@ -94,12 +94,12 @@ describe('Monorepo Support', () => {
 
     // Check that API package imports were updated to reference UI package
     const userRepositoryContent = await readFileContent(
-      join(tempFixturePath, 'packages/api/src/services/user-repository.ts')
+      join(tempFixturePath, 'packages/api/src/services/user-repository.ts'),
     )
     // This is complex - the API package would now need to depend on UI package for validation
     // Or we need to handle cross-package imports differently
     expect(userRepositoryContent).toContain(
-      "import { UserValidator, ValidationError, isValidUser } from '../../../ui/src/utils/validation';"
+      "import { UserValidator, ValidationError, isValidUser } from '../../../ui/src/utils/validation';",
     )
   })
 
@@ -129,7 +129,7 @@ export const slugify = (str: string): string => {
 export const truncate = (str: string, length: number): string => {
   return str.length <= length ? str : str.slice(0, length) + '...';
 };
-`
+`,
     )
 
     // Add usage in UI package
@@ -148,7 +148,7 @@ export const UserDisplay: React.FC<{ user: User }> = ({ user }) => {
     </div>
   );
 };
-`
+`,
     )
 
     // Add usage in API package
@@ -166,7 +166,7 @@ export const createUserSlug = (user: User): string => {
 export const formatUserDisplayName = (user: User): string => {
   return capitalize(user.name);
 };
-`
+`,
     )
 
     // Add usage in web app
@@ -184,7 +184,7 @@ export const formatUserForDisplay = (user: User) => {
     slug: slugify(user.name)
   };
 };
-`
+`,
     )
 
     // Now move the string-utils file to a different location within core
@@ -193,17 +193,17 @@ export const formatUserForDisplay = (user: User) => {
     // Verify all imports were updated
     const uiDisplayContent = await readFileContent(uiUtilsFile)
     expect(uiDisplayContent).toContain(
-      "import { capitalize, truncate } from '@test-monorepo/core/shared/string-utils';"
+      "import { capitalize, truncate } from '@test-monorepo/core/shared/string-utils';",
     )
 
     const apiFormattingContent = await readFileContent(apiUtilsFile)
     expect(apiFormattingContent).toContain(
-      "import { slugify, capitalize } from '@test-monorepo/core/shared/string-utils';"
+      "import { slugify, capitalize } from '@test-monorepo/core/shared/string-utils';",
     )
 
     const webDisplayContent = await readFileContent(webUtilsFile)
     expect(webDisplayContent).toContain(
-      "import { capitalize, truncate, slugify } from '@test-monorepo/core/shared/string-utils';"
+      "import { capitalize, truncate, slugify } from '@test-monorepo/core/shared/string-utils';",
     )
   })
 
@@ -238,7 +238,7 @@ export class UserService {
     return result.success;
   }
 }
-`
+`,
     )
 
     // Use this service in the web app
@@ -257,7 +257,7 @@ export const useUserService = () => {
 
   return service;
 };
-`
+`,
     )
 
     // Now move the UserService to the core package (making it more reusable)
@@ -265,10 +265,10 @@ export const useUserService = () => {
 
     // Check that the moved file now imports UserController from the API package
     const movedServiceContent = await readFileContent(
-      join(tempFixturePath, 'packages/core/src/services/user-service.ts')
+      join(tempFixturePath, 'packages/core/src/services/user-service.ts'),
     )
     expect(movedServiceContent).toContain(
-      "import { UserController } from '../../../api/src/controllers/user-controller';"
+      "import { UserController } from '../../../api/src/controllers/user-controller';",
     )
 
     // Check that the web app now imports from core instead of api
@@ -312,7 +312,7 @@ export interface PaginatedResponse<T> {
     totalPages: number;
   };
 }
-`
+`,
     )
 
     // Update API package index to export these types
@@ -349,7 +349,7 @@ export class ApiClient {
     }
   }
 }
-`
+`,
     )
 
     // Move the API types to core package (more fundamental)
@@ -362,7 +362,7 @@ export class ApiClient {
     // Check that web app import was updated
     const webApiClientContent = await readFileContent(webApiClientFile)
     expect(webApiClientContent).toContain(
-      "import { ApiError, PaginationParams, PaginatedResponse } from '@test-monorepo/core/types/api-types';"
+      "import { ApiError, PaginationParams, PaginatedResponse } from '@test-monorepo/core/types/api-types';",
     )
   })
 
@@ -418,7 +418,7 @@ export class UserEventEmitter {
 }
 
 export const userEventEmitter = new UserEventEmitter();
-`
+`,
     )
 
     // Update core index to export events
@@ -429,7 +429,8 @@ export const userEventEmitter = new UserEventEmitter();
     // Use events in API package
     const updatedUserController = join(tempFixturePath, 'packages/api/src/controllers/user-controller.ts')
     let userControllerContent = await readFileContent(updatedUserController)
-    userControllerContent = `import { userEventEmitter, UserCreatedEvent, UserUpdatedEvent, UserDeletedEvent } from '@test-monorepo/core/events/user-events';
+    userControllerContent =
+      `import { userEventEmitter, UserCreatedEvent, UserUpdatedEvent, UserDeletedEvent } from '@test-monorepo/core/events/user-events';
 ${userControllerContent}`
 
     // Add event emission to create user method (simplified update)
@@ -444,7 +445,7 @@ ${userControllerContent}`
       return {
         success: true,
         data: user
-      };`
+      };`,
     )
 
     await writeFile(updatedUserController, userControllerContent)
@@ -481,7 +482,7 @@ export const useUserNotifications = () => {
     };
   }, []);
 };
-`
+`,
     )
 
     // Use events in web app
@@ -497,7 +498,7 @@ export const EventListener: React.FC = () => {
 
   return null; // This is just an event listener component
 };
-`
+`,
     )
 
     // Now move the events file to a more specific location
@@ -509,12 +510,12 @@ export const EventListener: React.FC = () => {
 
     const updatedControllerContent = await readFileContent(updatedUserController)
     expect(updatedControllerContent).toContain(
-      "import { userEventEmitter, UserCreatedEvent, UserUpdatedEvent, UserDeletedEvent } from '@test-monorepo/core/domain/user-events';"
+      "import { userEventEmitter, UserCreatedEvent, UserUpdatedEvent, UserDeletedEvent } from '@test-monorepo/core/domain/user-events';",
     )
 
     const updatedNotificationHookContent = await readFileContent(notificationHook)
     expect(updatedNotificationHookContent).toContain(
-      "import { userEventEmitter, AllUserEvents } from '@test-monorepo/core/domain/user-events';"
+      "import { userEventEmitter, AllUserEvents } from '@test-monorepo/core/domain/user-events';",
     )
 
     // Web app should import from the updated core export

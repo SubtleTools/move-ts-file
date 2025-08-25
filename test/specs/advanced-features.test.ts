@@ -48,7 +48,7 @@ describe('Advanced Import Resolution Features', () => {
     // Check that path-mapped imports were updated correctly
     const userRepositoryContent = await readFileContent(join(tempFixturePath, 'src/services/user-repository.ts'))
     expect(userRepositoryContent).toContain(
-      "import { Database, DatabaseConfig, createDatabase } from '@/data/database';"
+      "import { Database, DatabaseConfig, createDatabase } from '@/data/database';",
     )
 
     // The path mapping should resolve to the new location
@@ -81,7 +81,7 @@ export class DatabaseService {
     this.db = new Database(config);
   }
 }
-`
+`,
     )
 
     // Reinitialize to pick up the new tsconfig
@@ -111,7 +111,7 @@ import { ValidationResult } from '#utils/validation';
 export const testValidation = (): ValidationResult => {
   return { isValid: true, errors: [] };
 };
-`
+`,
     )
 
     // Update package.json to include the wildcard import
@@ -153,7 +153,7 @@ export const testValidation = (): ValidationResult => {
 import { createValidator } from '#validation';
 
 export const validator = createValidator();
-`
+`,
     )
 
     // Reinitialize to pick up the new package.json
@@ -195,7 +195,7 @@ export class MixedImportsTest {
     this.logger.info('Processing user', { userId: user.id });
   }
 }
-`
+`,
     )
 
     // Update configs to support all import types
@@ -267,7 +267,7 @@ import { Database } from '@utils/database';
 export class ExternalService {
   db = new Database({ host: 'external', port: 5432, database: 'external' });
 }
-`
+`,
     )
 
     // Move database from utils (mapped) to external (unmapped)
@@ -280,7 +280,7 @@ export class ExternalService {
     // Files that were using the mapped path should now use relative paths too
     const userRepositoryContent = await readFileContent(join(tempFixturePath, 'src/services/user-repository.ts'))
     expect(userRepositoryContent).toContain(
-      "import { Database, DatabaseConfig, createDatabase } from '../../external/database';"
+      "import { Database, DatabaseConfig, createDatabase } from '../../external/database';",
     )
   })
 
@@ -308,7 +308,7 @@ export class TypeTest {
     return createDatabase(this.config);
   }
 }
-`
+`,
     )
 
     // Move the database file
@@ -360,13 +360,13 @@ export class TypeTest {
 
     // Check that API package imports are updated
     const userRepositoryContent = await readFileContent(
-      join(tempFixturePath, 'packages/api/src/services/user-repository.ts')
+      join(tempFixturePath, 'packages/api/src/services/user-repository.ts'),
     )
     expect(userRepositoryContent).toContain(
-      "import { UserValidator, ValidationError, isValidUser } from '../../../ui/src/utils/validation';"
+      "import { UserValidator, ValidationError, isValidUser } from '../../../ui/src/utils/validation';",
     )
     expect(userRepositoryContent).toContain(
-      "import { \n  User, \n  UserRole, \n  CreateUserRequest, \n  UpdateUserRequest,\n  UserSummary \n} from '../../../core/src/shared/user';"
+      "import { \n  User, \n  UserRole, \n  CreateUserRequest, \n  UpdateUserRequest,\n  UserSummary \n} from '../../../core/src/shared/user';",
     )
   })
 })

@@ -198,7 +198,7 @@ describe('TypeScriptFileMover', () => {
     await mover.init()
 
     await expect(mover.moveFile('src/utils/helper.ts', 'src/components/UserCard.tsx')).rejects.toThrow(
-      'Destination already exists'
+      'Destination already exists',
     )
   })
 
@@ -226,7 +226,7 @@ describe('TypeScriptFileMover', () => {
 export const isolatedFunction = () => {
   return "This file is not imported by anyone";
 };
-`
+`,
     )
 
     const mover = new TypeScriptFileMover(tempFixturePath)
@@ -249,7 +249,7 @@ export const isolatedFunction = () => {
       `
 export { User, UserService, formatUserName } from './utils/helper';
 export * from './components/UserCard';
-`
+`,
     )
 
     const mover = new TypeScriptFileMover(tempFixturePath)

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
+import { glob } from 'glob'
 import { existsSync, renameSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path'
-import { glob } from 'glob'
 import * as ts from 'typescript'
 
 /**
@@ -139,7 +139,7 @@ export class TypeScriptFileMover {
           const basePath = resolve(dirname(configPath), baseUrl)
 
           for (const [alias, paths] of Object.entries(config.config.compilerOptions.paths)) {
-            const pathInfos: PathMappingInfo[] = (paths as string[]).map((pathPattern) => {
+            const pathInfos: PathMappingInfo[] = (paths as string[]).map(pathPattern => {
               const aliasPattern = alias.replace(/\*$/, '')
               const normalizedPathPattern = pathPattern.replace(/\*$/, '')
 
@@ -267,7 +267,7 @@ export class TypeScriptFileMover {
     if (destPath.endsWith('/') || (!extname(destPath) && !destPath.includes('.'))) {
       // It's a directory - we need the source filename
       throw new Error(
-        'Destination directory specified, but source filename is needed. Use: move-ts.ts <source> <dest-dir/filename.ts>'
+        'Destination directory specified, but source filename is needed. Use: move-ts.ts <source> <dest-dir/filename.ts>',
       )
     }
 
@@ -496,7 +496,7 @@ export class TypeScriptFileMover {
     specifier: string,
     importKey: string,
     importValue: string | string[],
-    packageRoot: string
+    packageRoot: string,
   ): string | null {
     const values = Array.isArray(importValue) ? importValue : [importValue]
 
@@ -583,7 +583,7 @@ export class TypeScriptFileMover {
   private async calculateImportUpdates(
     oldPath: string,
     newPath: string,
-    affectedFiles: string[]
+    affectedFiles: string[],
   ): Promise<FileUpdate[]> {
     const updates: FileUpdate[] = []
 
@@ -593,7 +593,7 @@ export class TypeScriptFileMover {
         const sourceFile = ts.createSourceFile(file, content, ts.ScriptTarget.Latest, true)
         const imports = this.extractImports(sourceFile)
 
-        const relevantImports = imports.filter((imp) => {
+        const relevantImports = imports.filter(imp => {
           const resolvedImport = this.resolveImportPath(imp.specifier, file)
           return (
             resolvedImport && this.normalizePathForMatching(resolvedImport) === this.normalizePathForMatching(oldPath)
@@ -605,7 +605,7 @@ export class TypeScriptFileMover {
           updates.push({
             filePath: file,
             content,
-            references: relevantImports.map((ref) => ({
+            references: relevantImports.map(ref => ({
               ...ref,
               newPath: newPath, // Add the new path to the reference
             })),
@@ -679,7 +679,7 @@ export class TypeScriptFileMover {
 
   private getImportType(
     specifier: string,
-    fromFile: string
+    fromFile: string,
   ): {
     type: 'tsconfig' | 'package' | 'relative'
     pathInfo?: PathMappingInfo
@@ -748,7 +748,7 @@ export class TypeScriptFileMover {
   private calculatePackageImportPath(
     oldSpecifier: string,
     newPath: string,
-    packageInfo: PackageImportsInfo
+    packageInfo: PackageImportsInfo,
   ): string | null {
     // For package imports, try to maintain the same import pattern if possible
     for (const [importKey, importValue] of packageInfo.imports.entries()) {

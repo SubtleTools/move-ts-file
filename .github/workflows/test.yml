@@ -12,75 +12,41 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
-        runtime: [node, bun]
+        bun-version: ['1.0', '1.1', 'latest']
         
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Setup Node.js ${{ matrix.node-version }}
-        if: matrix.runtime == 'node'
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          
-      - name: Setup Bun (if testing with bun)
-        if: matrix.runtime == 'bun'
+          node-version: '20'
+        
+      - name: Setup Bun ${{ matrix.bun-version }}
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: ${{ matrix.bun-version }}
           
-      - name: Install dependencies (Node)
-        if: matrix.runtime == 'node'
-        run: npm install
-        
-      - name: Install dependencies (Bun)
-        if: matrix.runtime == 'bun'
+      - name: Install dependencies
         run: bun install --frozen-lockfile
         
       - name: Type check
-        run: |
-          if [ "${{ matrix.runtime }}" = "bun" ]; then
-            bun run typecheck
-          else
-            npm run typecheck
-          fi
+        run: bun run typecheck
           
       - name: Lint
-        run: |
-          if [ "${{ matrix.runtime }}" = "bun" ]; then
-            bun run lint
-          else
-            npm run lint
-          fi
+        run: bun run lint
           
       - name: Format check
-        run: |
-          if [ "${{ matrix.runtime }}" = "bun" ]; then
-            bun run format:check
-          else
-            npm run format:check
-          fi
+        run: bun run format:check
           
       - name: Test
-        run: |
-          if [ "${{ matrix.runtime }}" = "bun" ]; then
-            bun run test
-          else
-            npm run test
-          fi
+        run: bun run test
           
       - name: Build
-        run: |
-          if [ "${{ matrix.runtime }}" = "bun" ]; then
-            bun run build
-          else
-            npm run build
-          fi
+        run: bun run build
           
-      - name: Test CLI (Node)
-        if: matrix.runtime == 'node'
+      - name: Test CLI with Node.js
         run: |
           mkdir -p test-cli/src
           echo 'export const test = "hello";' > test-cli/src/test.ts
@@ -95,16 +61,15 @@ jobs:
           cd ..
           rm -rf test-cli
           
-      - name: Test CLI (Bun)
-        if: matrix.runtime == 'bun'
+      - name: Test CLI with Bun
         run: |
           mkdir -p test-cli/src
           echo 'export const test = "hello";' > test-cli/src/test.ts
           echo 'import { test } from "./test";' > test-cli/src/main.ts
           cd test-cli
-          bun ../bin/move-ts-file.js src/test.ts src/utils/test.ts
+          bun ../bin/move-ts-file.js src/test.ts src/lib/test.ts
           # Verify the import was updated
-          if ! grep -q 'from "./utils/test"' src/main.ts; then
+          if ! grep -q 'from "./lib/test"' src/main.ts; then
             echo "CLI test failed - import not updated correctly"
             exit 1
           fi

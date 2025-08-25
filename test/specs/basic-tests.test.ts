@@ -79,7 +79,7 @@ describe('Move-TS Basic Functionality', () => {
     // Check deeply nested import paths were updated correctly
     const textInputContent = await readFileContent(join(tempFixturePath, 'src/components/ui/inputs/TextInput.tsx'))
     expect(textInputContent).toContain(
-      "import { ValidationRule, RequiredRule, MinLengthRule } from '../../../core/validation/rules';"
+      "import { ValidationRule, RequiredRule, MinLengthRule } from '../../../core/validation/rules';",
     )
 
     const userFormContent = await readFileContent(join(tempFixturePath, 'src/components/forms/UserForm.tsx'))
@@ -114,7 +114,7 @@ export class MultipleImportsExample {
     this.service.addUser(user);
   }
 }
-`
+`,
     )
 
     await mover.moveFile('src/utils/helper.ts', 'src/shared/helper.ts')
@@ -138,7 +138,7 @@ export class MultipleImportsExample {
 export { User, UserService } from './utils/helper';
 export * from './components/UserCard';
 export { formatUserName as formatUser } from './utils/helper';
-`
+`,
     )
 
     await mover.moveFile('src/utils/helper.ts', 'src/types/helper.ts')
@@ -160,7 +160,7 @@ export { formatUserName as formatUser } from './utils/helper';
 
     // Test: Destination already exists
     await expect(mover.moveFile('src/utils/helper.ts', 'src/components/UserCard.tsx')).rejects.toThrow(
-      'Destination already exists'
+      'Destination already exists',
     )
 
     // Test: Non-TypeScript file
@@ -189,7 +189,7 @@ export class IsolatedClass {
     console.log("isolated");
   }
 }
-`
+`,
     )
 
     // This should succeed but update 0 files
@@ -223,7 +223,7 @@ export class IsolatedClass {
 
     const textInputContent = await readFileContent(join(tempFixturePath, 'src/components/ui/inputs/TextInput.tsx'))
     expect(textInputContent).toContain(
-      "import { ValidationRule, RequiredRule, MinLengthRule } from '../../../validation-rules';"
+      "import { ValidationRule, RequiredRule, MinLengthRule } from '../../../validation-rules';",
     )
 
     const userFormContent = await readFileContent(join(tempFixturePath, 'src/components/forms/UserForm.tsx'))
