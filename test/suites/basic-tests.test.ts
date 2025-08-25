@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
+import { TypeScriptFileMover } from '#src';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { existsSync } from 'node:fs';
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { TypeScriptFileMover } from '../../move-ts.ts';
 
 const FIXTURES_DIR = resolve(__dirname, '../fixtures');
 const TEMP_DIR = resolve(__dirname, '../temp');
@@ -57,13 +57,13 @@ describe('Move-TS Basic Functionality', () => {
 
     // Check that imports were updated
     const userCardContent = await readFileContent(join(tempFixturePath, 'src/components/UserCard.tsx'));
-    expect(userCardContent).toContain("import { User, formatUserName } from '../lib/helper';");
+    expect(userCardContent).toContain("import { formatUserName, User } from '../lib/helper';");
 
     const _apiContent = await readFileContent(join(tempFixturePath, 'src/services/api.ts'));
-    expect(userCardContent).toContain("import { User, formatUserName } from '../lib/helper';");
+    expect(userCardContent).toContain("import { formatUserName, User } from '../lib/helper';");
 
     const testContent = await readFileContent(join(tempFixturePath, 'tests/helper.test.ts'));
-    expect(testContent).toContain("import { User, UserService, formatUserName } from '../src/lib/helper';");
+    expect(testContent).toContain("import { formatUserName, User, UserService } from '../src/lib/helper';");
   });
 
   test('Deep nested relative imports', async () => {
@@ -79,14 +79,14 @@ describe('Move-TS Basic Functionality', () => {
     // Check deeply nested import paths were updated correctly
     const textInputContent = await readFileContent(join(tempFixturePath, 'src/components/ui/inputs/TextInput.tsx'));
     expect(textInputContent).toContain(
-      "import { ValidationRule, RequiredRule, MinLengthRule } from '../../../core/validation/rules';",
+      "import { MinLengthRule, RequiredRule, ValidationRule } from '../../../core/validation/rules';",
     );
 
     const userFormContent = await readFileContent(join(tempFixturePath, 'src/components/forms/UserForm.tsx'));
     expect(userFormContent).toContain("import { EmailRule, RequiredRule } from '../../core/validation/rules';");
 
     const testContent = await readFileContent(join(tempFixturePath, 'tests/unit/components/TextInput.test.tsx'));
-    expect(testContent).toContain("import { RequiredRule, MinLengthRule } from '../../../src/core/validation/rules';");
+    expect(testContent).toContain("import { MinLengthRule, RequiredRule } from '../../../src/core/validation/rules';");
   });
 
   test('Multiple imports from same file', async () => {
@@ -208,7 +208,7 @@ export class IsolatedClass {
     await mover.moveFile('src/utils/helper.ts', 'src/utils/core/helper.ts');
 
     const userCardContent = await readFileContent(join(tempFixturePath, 'src/components/UserCard.tsx'));
-    expect(userCardContent).toContain("import { User, formatUserName } from '../utils/core/helper';");
+    expect(userCardContent).toContain("import { formatUserName, User } from '../utils/core/helper';");
 
     const apiContent = await readFileContent(join(tempFixturePath, 'src/services/api.ts'));
     expect(apiContent).toContain("import { User, UserService } from '../utils/core/helper';");
@@ -223,7 +223,7 @@ export class IsolatedClass {
 
     const textInputContent = await readFileContent(join(tempFixturePath, 'src/components/ui/inputs/TextInput.tsx'));
     expect(textInputContent).toContain(
-      "import { ValidationRule, RequiredRule, MinLengthRule } from '../../../validation-rules';",
+      "import { MinLengthRule, RequiredRule, ValidationRule } from '../../../validation-rules';",
     );
 
     const userFormContent = await readFileContent(join(tempFixturePath, 'src/components/forms/UserForm.tsx'));

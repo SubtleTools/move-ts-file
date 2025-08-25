@@ -6,7 +6,7 @@
     "lib": ["es2020"],
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -14,8 +14,13 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "downlevelIteration": true,
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "baseUrl": ".",
+    "paths": {
+      "#src": ["./src/index.ts"],
+      "#src/*": ["./src/*"]
+    }
   },
-  "include": ["move-ts.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "test", "dist"]
 }

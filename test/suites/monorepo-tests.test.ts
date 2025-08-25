@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
+import { TypeScriptFileMover } from '#src';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { existsSync } from 'node:fs';
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { TypeScriptFileMover } from '../../move-ts.ts';
 
 const FIXTURES_DIR = resolve(__dirname, '../fixtures');
 const TEMP_DIR = resolve(__dirname, '../temp');
@@ -54,7 +54,7 @@ describe('Monorepo Support', () => {
 
     // Check that import within the same package was updated
     const validationContent = await readFileContent(join(tempFixturePath, 'packages/core/src/utils/validation.ts'));
-    expect(validationContent).toContain("import { User, UserRole, CreateUserRequest } from '../entities/user';");
+    expect(validationContent).toContain("import { CreateUserRequest, User, UserRole } from '../entities/user';");
 
     // Check that imports in other packages were updated (these use path mapping)
     const _userCardContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/components/UserCard.tsx'));
@@ -81,25 +81,24 @@ describe('Monorepo Support', () => {
 
     // The moved file should now import from its new relative location to user types
     const movedValidationContent = await readFileContent(join(tempFixturePath, targetFile));
-    expect(movedValidationContent).toContain("import { User, UserRole, CreateUserRequest } from '../types/user';");
+    expect(movedValidationContent).toContain("import { CreateUserRequest, User, UserRole } from '../types/user';");
 
     // Check that the core package index file was updated to not export validation
     const _coreIndexContent = await readFileContent(join(tempFixturePath, 'packages/core/src/index.ts'));
     // Note: Our tool doesn't automatically update index.ts exports, but the import paths should be updated
 
-    // Check that UI components can now import validation locally
+    // Check that UI components can now import validation from ui workspace
     const userFormContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/forms/UserForm.tsx'));
-    // This should now import from local utils instead of @test-monorepo/core
-    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '../utils/validation';");
+    // This should now import from ui package workspace import instead of core package
+    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '@test-monorepo/ui/utils/validation';");
 
     // Check that API package imports were updated to reference UI package
     const userRepositoryContent = await readFileContent(
       join(tempFixturePath, 'packages/api/src/services/user-repository.ts'),
     );
-    // This is complex - the API package would now need to depend on UI package for validation
-    // Or we need to handle cross-package imports differently
+    // The API package should now use workspace import to UI package for validation
     expect(userRepositoryContent).toContain(
-      "import { UserValidator, ValidationError, isValidUser } from '../../../ui/src/utils/validation';",
+      "import { isValidUser, UserValidator, ValidationError } from '@test-monorepo/ui/utils/validation';",
     );
   });
 
@@ -268,7 +267,7 @@ export const useUserService = () => {
       join(tempFixturePath, 'packages/core/src/services/user-service.ts'),
     );
     expect(movedServiceContent).toContain(
-      "import { UserController } from '../../../api/src/controllers/user-controller';",
+      "import { UserController } from '../controllers/user-controller';",
     );
 
     // Check that the web app now imports from core instead of api
@@ -357,7 +356,7 @@ export class ApiClient {
 
     // Check that API index.ts was updated to import from core
     const updatedApiIndex = await readFileContent(apiIndexFile);
-    expect(updatedApiIndex).toContain('export * from "../../../core/src/types/api-types";');
+    expect(updatedApiIndex).toContain('export * from "../../core/src/types/api-types";');
 
     // Check that web app import was updated
     const webApiClientContent = await readFileContent(webApiClientFile);

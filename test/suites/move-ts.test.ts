@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
+import { TypeScriptFileMover } from '#src';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { existsSync } from 'node:fs';
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { TypeScriptFileMover } from '../../move-ts.ts';
 
 const FIXTURES_DIR = resolve(__dirname, '../fixtures');
 const TEMP_DIR = resolve(__dirname, '../temp');
@@ -28,7 +28,7 @@ const TEST_CASES: TestCase[] = [
     expectedUpdates: [
       {
         file: 'src/components/UserCard.tsx',
-        expectedImport: "import { User, formatUserName } from '../lib/helper';",
+        expectedImport: "import { formatUserName, User } from '../lib/helper';",
       },
       {
         file: 'src/services/api.ts',
@@ -36,7 +36,7 @@ const TEST_CASES: TestCase[] = [
       },
       {
         file: 'tests/helper.test.ts',
-        expectedImport: "import { User, UserService, formatUserName } from '../src/lib/helper';",
+        expectedImport: "import { formatUserName, User, UserService } from '../src/lib/helper';",
       },
     ],
   },
@@ -48,7 +48,7 @@ const TEST_CASES: TestCase[] = [
     expectedUpdates: [
       {
         file: 'src/services/user-repository.ts',
-        expectedImport: "import { Database, DatabaseConfig, createDatabase } from '@/core/database';",
+        expectedImport: "import { createDatabase, Database, DatabaseConfig } from '@/core/database';",
       },
       {
         file: 'lib/config.ts',
@@ -65,11 +65,11 @@ const TEST_CASES: TestCase[] = [
       {
         file: 'src/features/user-form.ts',
         expectedImport:
-          "import { Validator, ValidationResult, emailRule, requiredRule } from '../shared/utils/validation';",
+          "import { emailRule, requiredRule, ValidationResult, Validator } from '../shared/utils/validation';",
       },
       {
         file: 'src/features/auth-service.ts',
-        expectedImport: "import { createValidator, requiredRule, emailRule } from '../shared/utils/validation';",
+        expectedImport: "import { createValidator, emailRule, requiredRule } from '../shared/utils/validation';",
       },
     ],
   },
@@ -81,7 +81,7 @@ const TEST_CASES: TestCase[] = [
     expectedUpdates: [
       {
         file: 'src/components/ui/inputs/TextInput.tsx',
-        expectedImport: "import { ValidationRule, RequiredRule, MinLengthRule } from '../../../core/validation/rules';",
+        expectedImport: "import { MinLengthRule, RequiredRule, ValidationRule } from '../../../core/validation/rules';",
       },
       {
         file: 'src/components/forms/UserForm.tsx',
@@ -89,7 +89,7 @@ const TEST_CASES: TestCase[] = [
       },
       {
         file: 'tests/unit/components/TextInput.test.tsx',
-        expectedImport: "import { RequiredRule, MinLengthRule } from '../../../src/core/validation/rules';",
+        expectedImport: "import { MinLengthRule, RequiredRule } from '../../../src/core/validation/rules';",
       },
     ],
   },
@@ -101,7 +101,7 @@ const TEST_CASES: TestCase[] = [
     expectedUpdates: [
       {
         file: 'src/core/event-bus.ts',
-        expectedImport: "import { Logger, LogLevel, createLogger } from '~/core/logging/logger';",
+        expectedImport: "import { createLogger, Logger, LogLevel } from '~/core/logging/logger';",
       },
       {
         file: 'src/features/notification-service.ts',
@@ -274,7 +274,7 @@ describe('TypeScriptFileMover Integration', () => {
 
     // Verify the event-bus file was updated
     const eventBusContent = await readFileContent(join(tempFixturePath, 'src/core/event-bus.ts'));
-    expect(eventBusContent).toContain("import { Logger, LogLevel, createLogger } from '~/core/logging/logger';");
+    expect(eventBusContent).toContain("import { createLogger, Logger, LogLevel } from '~/core/logging/logger';");
 
     // Now move event-bus to a different location
     await mover.moveFile('src/core/event-bus.ts', 'src/shared/event-bus.ts');

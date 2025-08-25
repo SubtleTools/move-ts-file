@@ -79,7 +79,36 @@ Supports all TypeScript import patterns:
 - **Relative imports**: `'./file'`, `'../utils/helper'`
 - **TypeScript path mappings**: `'@/components/Button'`, `'@utils/validation'`
 - **Node.js package imports**: `'#internal/utils'`, `'#shared/components'`
-- **Monorepo imports**: Cross-package references in complex monorepos
+- **Workspace imports**: `'@scope/package/module'` in monorepos with workspace dependencies
+
+### 🗂️ Intelligent Barrel Export Handling
+
+**NEW**: Automatically updates barrel files (index.ts re-exports) when moving files:
+
+```typescript
+// Before: src/utils/index.ts
+export { User, formatUserName } from './helper.js';
+export { validateEmail } from './validation.js';
+
+// After moving src/utils/helper.ts → src/shared/helper.ts
+export { User, formatUserName } from '../shared/helper.js';  // ✅ Updated
+export { validateEmail } from './validation.js';             // ✅ Unchanged
+```
+
+**How it works:**
+- **Enabled by default**: Barrel exports are automatically updated
+- **Preserves imports**: Components importing from barrels don't need changes
+- **Multi-level support**: Handles nested barrel exports across directories
+- **Star export support**: Works with `export *` statements
+
+**Control the behavior:**
+```bash
+# Default: Updates barrel exports automatically
+move-ts-file src/utils/helper.ts src/shared/helper.ts
+
+# Disable barrel updates if you prefer manual control
+move-ts-file src/utils/helper.ts src/shared/helper.ts --no-update-barrels
+```
 
 ### 🧠 Intelligent Path Preservation
 
@@ -122,6 +151,29 @@ move-ts-file packages/ui/src/Button.tsx packages/design-system/src/components/Bu
 move-ts-file apps/web/src/utils/api.ts packages/shared/src/api-client.ts
 ```
 
+### Workspace Import Preservation
+
+Automatically handles workspace dependencies with perfect import style preservation:
+
+```bash
+# Before moving: packages/core/src/types/user.ts
+import { User } from '@my-app/core/types/user';
+
+# After moving to: packages/core/src/entities/user.ts
+import { User } from '@my-app/core/entities/user';  # ✅ Workspace import preserved
+
+# Cross-package moves work too:
+# Moving packages/api/service.ts → packages/core/service.ts
+import { ApiService } from '@my-app/api/service';      # Before
+import { ApiService } from '@my-app/core/service';     # After ✅
+```
+
+**Key benefits:**
+- **Preserves workspace imports** instead of converting to relative paths
+- **Handles cross-package moves** automatically
+- **Works with any workspace setup** (npm, yarn, pnpm, bun workspaces)
+- **No configuration needed** - auto-discovers workspace packages
+
 ### TypeScript Path Mapping
 
 Seamlessly handles tsconfig.json path mappings:
@@ -162,6 +214,45 @@ Supports modern Node.js package import patterns:
 move-ts-file src/internal/utils.ts src/shared/utils.ts
 # Updates: import utils from '#internal/utils' → '#shared/utils'
 ```
+
+### Barrel Export Management
+
+Handles complex barrel export scenarios automatically:
+
+```typescript
+// src/components/index.ts (barrel file)
+export { Button } from './Button.js';
+export { Modal } from './Modal.js';
+export { Card } from './Card.js';
+
+// src/App.tsx (imports from barrel)
+import { Button, Modal } from './components/index.js';
+```
+
+**When you move a file:**
+```bash
+move-ts-file src/components/Button.tsx src/ui/Button.tsx
+```
+
+**What happens:**
+1. **Barrel is updated**: `export { Button } from '../ui/Button.js';`
+2. **App.tsx unchanged**: Still imports from `./components/index.js`
+3. **Zero breaking changes**: All imports continue to work
+
+**Advanced scenarios:**
+```bash
+# Move between packages with barrel preservation
+move-ts-file packages/ui/src/Button.tsx packages/shared/src/Button.tsx
+# Barrel in ui/index.ts → export { Button } from '../shared/src/Button.js';
+
+# Disable if you want manual control
+move-ts-file src/Button.tsx src/shared/Button.tsx --no-update-barrels
+```
+
+**Perfect for:**
+- Large refactoring projects with established barrel patterns
+- Maintaining API stability during internal reorganization  
+- Monorepo restructuring without breaking consuming packages
 
 ## 🤖 Integration with AI Coding Assistants
 

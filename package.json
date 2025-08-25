@@ -3,16 +3,16 @@
   "version": "0.1.0",
   "description": "Intelligent CLI tool to move TypeScript files and automatically update all import paths throughout your project",
   "type": "module",
-  "main": "bin/move-ts-file.js",
+  "main": "dist/move-ts.js",
   "types": "dist/move-ts.d.ts",
   "bin": {
     "move-ts-file": "./bin/move-ts-file.js"
   },
   "scripts": {
-    "build": "bun build move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
-    "generate-types": "bun tsc --project tsconfig.json --emitDeclarationOnly",
-    "test": "bun test test/specs/",
-    "test:watch": "bun test --watch test/specs/",
+    "build": "bun build src/move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
+    "generate-types": "bun tsc",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
     "format": "dprint fmt",
     "format:check": "dprint check",
     "lint": "biome check .",
@@ -28,12 +28,16 @@
   ],
   "dependencies": {
     "glob": "^10.3.10",
+    "ts-morph": "^26.0.0",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.2",
     "@types/node": "^20.10.6",
-    "dprint": "^0.50.1"
+    "dprint": "^0.50.1",
+    "typedoc": "^0.28.11",
+    "typedoc-plugin-frontmatter": "^1.3.0",
+    "typedoc-plugin-markdown": "^4.8.1"
   },
   "keywords": [
     "typescript",
@@ -65,5 +69,9 @@
   "engines": {
     "node": ">=18.0.0",
     "bun": ">=1.0.0"
+  },
+  "imports": {
+    "#src": "./src/index.ts",
+    "#src/*": "./src/*"
   }
 }

@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
+import { TypeScriptFileMover } from '#src';
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { existsSync } from 'node:fs';
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { TypeScriptFileMover } from '../../move-ts.ts';
 
 const FIXTURES_DIR = resolve(__dirname, '../fixtures');
 const TEMP_DIR = resolve(__dirname, '../temp');
@@ -48,7 +48,7 @@ describe('Advanced Import Resolution Features', () => {
     // Check that path-mapped imports were updated correctly
     const userRepositoryContent = await readFileContent(join(tempFixturePath, 'src/services/user-repository.ts'));
     expect(userRepositoryContent).toContain(
-      "import { Database, DatabaseConfig, createDatabase } from '@/data/database';",
+      "import { createDatabase, Database, DatabaseConfig } from '@/data/database';",
     );
 
     // The path mapping should resolve to the new location
@@ -238,13 +238,12 @@ export class MixedImportsTest {
 
     // Check that internal imports within core were updated
     const validationContent = await readFileContent(join(tempFixturePath, 'packages/core/src/utils/validation.ts'));
-    expect(validationContent).toContain("import { User, UserRole, CreateUserRequest } from '../entities/user';");
+    expect(validationContent).toContain("import { CreateUserRequest, User, UserRole } from '../entities/user';");
 
-    // Check that cross-package imports were updated (these use relative paths now since our tool resolves them)
+    // Check that cross-package imports were updated while preserving workspace import style
     const userCardContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/components/UserCard.tsx'));
-    // Since the tool resolves @test-monorepo/core/types/user to a physical path,
-    // it should update the relative import to the new location
-    expect(userCardContent).toContain("import { User, UserRole } from '../../../core/src/entities/user';");
+    // The tool should preserve workspace imports when moving files within the same workspace
+    expect(userCardContent).toContain("import { User, UserRole } from '@test-monorepo/core/entities/user';");
 
     // Core package index should be updated
     const coreIndexContent = await readFileContent(join(tempFixturePath, 'packages/core/src/index.ts'));
@@ -280,7 +279,7 @@ export class ExternalService {
     // Files that were using the mapped path should now use relative paths too
     const userRepositoryContent = await readFileContent(join(tempFixturePath, 'src/services/user-repository.ts'));
     expect(userRepositoryContent).toContain(
-      "import { Database, DatabaseConfig, createDatabase } from '../../external/database';",
+      "import { createDatabase, Database, DatabaseConfig } from '../../external/database';",
     );
   });
 
@@ -335,8 +334,8 @@ export class TypeTest {
 
     // Files that imported from the core package should now import from ui
     const userFormContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/forms/UserForm.tsx'));
-    // Should now use a local import
-    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '../validation/validation';");
+    // Should now use workspace import to ui package
+    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '@test-monorepo/ui/validation/validation';");
   });
 
   test('Complex monorepo scenario with multiple moves', async () => {
@@ -352,21 +351,21 @@ export class TypeTest {
 
     // Check that the validation file (now in UI) imports user types correctly
     const validationContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/utils/validation.ts'));
-    expect(validationContent).toContain("import { User, UserRole, CreateUserRequest } from '../shared/user';");
+    expect(validationContent).toContain("import { CreateUserRequest, User, UserRole } from '../shared/user';");
 
-    // Check that UI components now use local validation
+    // Check that UI components now use workspace import to ui package
     const userFormContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/forms/UserForm.tsx'));
-    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '../utils/validation';");
+    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '@test-monorepo/ui/utils/validation';");
 
-    // Check that API package imports are updated
+    // Check that API package imports are updated to use workspace imports
     const userRepositoryContent = await readFileContent(
       join(tempFixturePath, 'packages/api/src/services/user-repository.ts'),
     );
     expect(userRepositoryContent).toContain(
-      "import { UserValidator, ValidationError, isValidUser } from '../../../ui/src/utils/validation';",
+      "import { isValidUser, UserValidator, ValidationError } from '@test-monorepo/ui/utils/validation';",
     );
     expect(userRepositoryContent).toContain(
-      "import { \n  User, \n  UserRole, \n  CreateUserRequest, \n  UpdateUserRequest,\n  UserSummary \n} from '../../../core/src/shared/user';",
+      "import { CreateUserRequest, UpdateUserRequest, User, UserRole, UserSummary } from '@test-monorepo/core/shared/user';",
     );
   });
 });
