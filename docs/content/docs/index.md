@@ -40,33 +40,52 @@ Comprehensive test suite with 47+ tests covering edge cases, monorepo scenarios,
 # Move a file and update all imports automatically
 npx move-ts-file src/utils/helper.ts src/shared/helper.ts
 
-# Or use with bun
-bunx move-ts-file src/components/Button.tsx src/ui/Button.tsx
+# Move to directory (keeps same filename)  
+move-ts-file src/components/Button.tsx shared/ui/
 
-# Works with complex paths too
+# Works with complex monorepo paths too
 move-ts-file packages/core/src/types/user.ts packages/shared/src/types/user.ts
 ```
 
-Before:
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+<Tabs>
+<TabItem label="Before">
+
+**src/components/UserCard.tsx**
 ```typescript
-// src/components/UserCard.tsx
 import { formatUser } from '@/utils/formatter';
 import { helper } from '../utils/helper.js';
-
-// src/index.ts
-export { helper } from './utils/helper.js';
 ```
 
-After running `move-ts-file src/utils/helper.ts src/shared/helper.ts`:
-
+**src/utils/index.ts** *(barrel file)*
 ```typescript
-// src/components/UserCard.tsx
-import { formatUser } from '@/utils/formatter'; // ✅ Unchanged
-import { helper } from '../shared/helper.js'; // ✅ Updated automatically
-
-// src/index.ts
-export { helper } from './shared/helper.js'; // ✅ Barrel export updated
+export { helper } from './helper.js';
+export { validation } from './validation.js';
 ```
+
+</TabItem>
+<TabItem label="After">
+
+**src/components/UserCard.tsx** *(Updated automatically)*
+```typescript
+import { formatUser } from '@/utils/formatter'; // ✅ Unchanged  
+import { helper } from '../shared/helper.js'; // ✅ Updated path
+```
+
+**src/utils/index.ts** *(Barrel export updated)*
+```typescript
+export { helper } from '../shared/helper.js'; // ✅ Points to new location
+export { validation } from './validation.js';  // ✅ Other exports unchanged
+```
+
+</TabItem>
+</Tabs>
+
+**Key Features Demonstrated:**
+- ✅ **Smart Import Updates**: All references automatically updated
+- ✅ **Barrel Export Management**: Index files updated to point to new locations  
+- ✅ **Style Preservation**: Maintains your existing import patterns
+- ✅ **Zero Breaking Changes**: Components importing from barrels still work
 
 Ready to get started? [Install move-ts-file](/installation/) and begin moving files with confidence.

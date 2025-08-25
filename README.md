@@ -67,6 +67,13 @@ move-ts-file utils/helper.ts lib/utils/string-helper.ts
 move-ts-file src/UserManager.tsx src/features/user-management/UserManager.tsx
 ```
 
+**Move to a directory destination:**
+
+```bash
+move-ts-file src/components/Button.tsx shared/ui/
+# Results in: shared/ui/Button.tsx
+```
+
 **Move shared utilities:**
 
 ```bash
@@ -86,7 +93,7 @@ Supports all TypeScript import patterns:
 
 ### 🗂️ Intelligent Barrel Export Handling
 
-**NEW**: Automatically updates barrel files (index.ts re-exports) when moving files:
+**NEW**: Automatically updates barrel files (index.ts re-exports) to point to new file locations:
 
 ```typescript
 // Before: src/utils/index.ts
@@ -94,9 +101,14 @@ export { formatUserName, User } from './helper.js';
 export { validateEmail } from './validation.js';
 
 // After moving src/utils/helper.ts → src/shared/helper.ts
-export { formatUserName, User } from '../shared/helper.js'; // ✅ Updated
+export { formatUserName, User } from '../shared/helper.js'; // ✅ Updated to new location
 export { validateEmail } from './validation.js'; // ✅ Unchanged
 ```
+
+**What this means:**
+- Components importing from barrels (`import { User } from './utils'`) continue to work unchanged
+- The barrel file acts as a stable API, hiding internal reorganization
+- No need to update dozens of files that import from the barrel
 
 **How it works:**
 

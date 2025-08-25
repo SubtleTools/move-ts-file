@@ -119,6 +119,55 @@ Now that you have move-ts-file installed:
 - Check out [Examples](/examples/) for common use cases
 - Read about [How It Works](/how-it-works/) under the hood
 
+## Quick Example
+
+Let's see how move-ts-file handles a typical refactoring scenario with barrel exports:
+
+```bash
+move-ts-file src/utils/helper.ts src/shared/helper.ts
+```
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<Tabs>
+<TabItem label="Before">
+
+**src/components/UserCard.tsx**
+```typescript
+import { formatUser } from '@/utils/formatter';
+import { helper } from '../utils/helper.js';
+```
+
+**src/utils/index.ts** *(barrel file)*
+```typescript  
+export { helper } from './helper.js';
+export { validation } from './validation.js';
+```
+
+</TabItem>
+<TabItem label="After">
+
+**src/components/UserCard.tsx** *(Updated automatically)*
+```typescript
+import { formatUser } from '@/utils/formatter'; // ✅ Unchanged
+import { helper } from '../shared/helper.js'; // ✅ Updated path
+```
+
+**src/utils/index.ts** *(Barrel export updated)*
+```typescript
+export { helper } from '../shared/helper.js'; // ✅ Points to new location
+export { validation } from './validation.js';  // ✅ Other exports unchanged
+```
+
+</TabItem>
+</Tabs>
+
+**What happened?**
+- The file was moved to its new location
+- All imports were updated to the new path
+- The barrel export was updated to point to the new location
+- Components importing from barrels continue to work unchanged
+
 Ready to start moving files? Try it on a simple file first:
 
 ```bash
