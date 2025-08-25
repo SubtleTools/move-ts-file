@@ -3,7 +3,7 @@
 import { glob } from 'glob';
 import { existsSync, renameSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, extname, isAbsolute, relative, resolve } from 'node:path';
+import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { BarrelAnalyzer } from './barrel-analyzer.js';
 import { ConfigLoader } from './config-loader.js';
 import { ImportAnalyzer } from './import-analyzer.js';
@@ -134,7 +134,7 @@ export class TypeScriptFileMover {
    */
   async moveFile(sourcePath: string, destPath: string): Promise<void> {
     const resolvedSource = resolve(this.projectRoot, sourcePath);
-    const resolvedDest = this.resolveDestination(destPath);
+    const resolvedDest = this.resolveDestination(sourcePath, destPath);
 
     // Validate source file exists
     if (!existsSync(resolvedSource)) {
@@ -185,19 +185,22 @@ export class TypeScriptFileMover {
     console.log(`Successfully moved file and updated ${totalUpdates} files with import changes`);
   }
 
-  private resolveDestination(destPath: string): string {
+  private resolveDestination(sourcePath: string, destPath: string): string {
     if (isAbsolute(destPath)) {
+      // If destPath is an absolute directory, append the source filename
+      if (destPath.endsWith('/') || (!extname(destPath) && !destPath.includes('.'))) {
+        const sourceFilename = basename(sourcePath);
+        return join(destPath, sourceFilename);
+      }
       return destPath;
     }
 
     const resolvedDest = resolve(this.projectRoot, destPath);
 
-    // If destPath is a directory, keep the original filename
+    // If destPath is a directory, append the source filename
     if (destPath.endsWith('/') || (!extname(destPath) && !destPath.includes('.'))) {
-      // It's a directory - we need the source filename
-      throw new Error(
-        'Destination directory specified, but source filename is needed. Use: move-ts.ts <source> <dest-dir/filename.ts>',
-      );
+      const sourceFilename = basename(sourcePath);
+      return join(resolvedDest, sourceFilename);
     }
 
     return resolvedDest;
