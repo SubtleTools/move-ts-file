@@ -1,11 +1,11 @@
-import { User, UserRole } from '@test-monorepo/core/types/user'
-import { UserValidator } from '@test-monorepo/core/utils/validation'
+import { User, UserRole } from '@test-monorepo/core/types/user';
+import { UserValidator } from '@test-monorepo/core/utils/validation';
 
 export interface UserCardProps {
-  user: User
-  onEdit?: (user: User) => void
-  onDelete?: (userId: string) => void
-  readonly?: boolean
+  user: User;
+  onEdit?: (user: User) => void;
+  onDelete?: (userId: string) => void;
+  readonly?: boolean;
 }
 
 export const UserCard: React.FC<UserCardProps> = ({
@@ -17,19 +17,19 @@ export const UserCard: React.FC<UserCardProps> = ({
   const getRoleBadgeColor = (role: UserRole): string => {
     switch (role) {
       case UserRole.ADMIN:
-        return 'bg-red-500'
+        return 'bg-red-500';
       case UserRole.MODERATOR:
-        return 'bg-yellow-500'
+        return 'bg-yellow-500';
       case UserRole.USER:
-        return 'bg-blue-500'
+        return 'bg-blue-500';
       case UserRole.GUEST:
-        return 'bg-gray-500'
+        return 'bg-gray-500';
       default:
-        return 'bg-gray-400'
+        return 'bg-gray-400';
     }
-  }
+  };
 
-  const isValidEmail = UserValidator.validateEmail(user.email).isValid
+  const isValidEmail = UserValidator.validateEmail(user.email).isValid;
 
   return (
     <div className='user-card p-4 border rounded-lg shadow'>
@@ -74,5 +74,5 @@ export const UserCard: React.FC<UserCardProps> = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};

@@ -1,20 +1,20 @@
-import { UserController } from '@test-monorepo/api/controllers/user-controller'
-import { UserRole } from '@test-monorepo/core/types/user'
-import { UserManagementPage } from './pages/UserManagement'
+import { UserController } from '@test-monorepo/api/controllers/user-controller';
+import { UserRole } from '@test-monorepo/core/types/user';
+import { UserManagementPage } from './pages/UserManagement';
 
 export const App: React.FC = () => {
-  const [currentPage, setCurrentPage] = React.useState<'users' | 'dashboard'>('dashboard')
-  const [userController] = React.useState(() => new UserController())
+  const [currentPage, setCurrentPage] = React.useState<'users' | 'dashboard'>('dashboard');
+  const [userController] = React.useState(() => new UserController());
 
   const renderCurrentPage = (): React.ReactNode => {
     switch (currentPage) {
       case 'users':
-        return <UserManagementPage userController={userController} />
+        return <UserManagementPage userController={userController} />;
       case 'dashboard':
       default:
-        return <DashboardPage userController={userController} />
+        return <DashboardPage userController={userController} />;
     }
-  }
+  };
 
   return (
     <div className='min-h-screen bg-gray-100'>
@@ -58,10 +58,10 @@ export const App: React.FC = () => {
         {renderCurrentPage()}
       </main>
     </div>
-  )
-}
+  );
+};
 
-const DashboardPage: React.FC<{ userController: UserController }> = ({
+const DashboardPage: React.FC<{ userController: UserController; }> = ({
   userController,
 }) => {
   const [stats, setStats] = React.useState({
@@ -69,34 +69,34 @@ const DashboardPage: React.FC<{ userController: UserController }> = ({
     adminUsers: 0,
     regularUsers: 0,
     guestUsers: 0,
-  })
+  });
 
   React.useEffect(() => {
-    loadStats()
-  }, [])
+    loadStats();
+  }, []);
 
   const loadStats = async (): Promise<void> => {
     try {
       const [allUsersResponse, adminUsersResponse] = await Promise.all([
         userController.getAllUsers(),
         userController.getUsersByRole(UserRole.ADMIN),
-      ])
+      ]);
 
       if (allUsersResponse.success && adminUsersResponse.success) {
-        const allUsers = allUsersResponse.data || []
-        const adminUsers = adminUsersResponse.data || []
+        const allUsers = allUsersResponse.data || [];
+        const adminUsers = adminUsersResponse.data || [];
 
         setStats({
           totalUsers: allUsers.length,
           adminUsers: adminUsers.length,
           regularUsers: allUsers.filter(u => u.role === UserRole.USER).length,
           guestUsers: allUsers.filter(u => u.role === UserRole.GUEST).length,
-        })
+        });
       }
     } catch (error) {
-      console.error('Failed to load stats:', error)
+      console.error('Failed to load stats:', error);
     }
-  }
+  };
 
   return (
     <div className='dashboard-page'>
@@ -165,5 +165,5 @@ const DashboardPage: React.FC<{ userController: UserController }> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

@@ -1,2 +1,2 @@
-export * from './components/UserCard'
-export * from './forms/UserForm'
+export * from './components/UserCard';
+export * from './forms/UserForm';

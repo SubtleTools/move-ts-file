@@ -4,6 +4,9 @@
     "includes": ["*.{js,jsx,ts,tsx}", "test/specs/**/*.{js,jsx,ts,tsx}"],
     "ignoreUnknown": false
   },
+  "organizeImports": {
+    "enabled": false
+  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",

@@ -1,1 +1,1 @@
-import { test } from './utils/test'
+import { test } from './utils/test';

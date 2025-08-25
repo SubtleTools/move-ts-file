@@ -2,7 +2,7 @@
   "$schema": "https://dprint.dev/schemas/v0.json",
   "typescript": {
     "quoteStyle": "preferSingle",
-    "semiColons": "asi",
+    "semiColons": "always",
     "trailingCommas": "onlyMultiLine",
     "operatorPosition": "nextLine",
     "arrowFunction.useParentheses": "preferNone"

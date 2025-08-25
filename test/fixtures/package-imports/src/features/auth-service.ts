@@ -1,14 +1,14 @@
-import { createValidator, emailRule, requiredRule } from '../shared/validation'
+import { createValidator, emailRule, requiredRule } from '../shared/validation';
 
 export interface LoginCredentials {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface AuthResult {
-  success: boolean
-  token?: string
-  errors?: string[]
+  success: boolean;
+  token?: string;
+  errors?: string[];
 }
 
 export class AuthService {
@@ -27,16 +27,16 @@ export class AuthService {
       name: 'password_required',
       validator: creds => !!creds.password,
       message: 'Password is required',
-    })
+    });
 
   async login(credentials: LoginCredentials): Promise<AuthResult> {
-    const validation = this.loginValidator.validate(credentials)
+    const validation = this.loginValidator.validate(credentials);
 
     if (!validation.isValid) {
       return {
         success: false,
         errors: validation.errors,
-      }
+      };
     }
 
     // Mock authentication logic
@@ -44,12 +44,12 @@ export class AuthService {
       return {
         success: true,
         token: 'mock-jwt-token-' + Date.now(),
-      }
+      };
     }
 
     return {
       success: false,
       errors: ['Invalid credentials'],
-    }
+    };
   }
 }

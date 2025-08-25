@@ -1,115 +1,115 @@
 #!/usr/bin/env bun
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
-import { existsSync } from 'node:fs'
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
-import { dirname, join, resolve } from 'node:path'
-import { TypeScriptFileMover } from '../../move-ts.ts'
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
+import { existsSync } from 'node:fs';
+import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { TypeScriptFileMover } from '../../move-ts.ts';
 
-const FIXTURES_DIR = resolve(__dirname, '../fixtures')
-const TEMP_DIR = resolve(__dirname, '../temp')
+const FIXTURES_DIR = resolve(__dirname, '../fixtures');
+const TEMP_DIR = resolve(__dirname, '../temp');
 
 async function createTempFixture(fixtureName: string): Promise<string> {
-  const fixtureSource = join(FIXTURES_DIR, fixtureName)
-  const tempFixture = join(TEMP_DIR, fixtureName)
+  const fixtureSource = join(FIXTURES_DIR, fixtureName);
+  const tempFixture = join(TEMP_DIR, fixtureName);
 
-  await rm(tempFixture, { recursive: true, force: true })
-  await mkdir(dirname(tempFixture), { recursive: true })
-  await cp(fixtureSource, tempFixture, { recursive: true })
+  await rm(tempFixture, { recursive: true, force: true });
+  await mkdir(dirname(tempFixture), { recursive: true });
+  await cp(fixtureSource, tempFixture, { recursive: true });
 
-  return tempFixture
+  return tempFixture;
 }
 
 async function readFileContent(filePath: string): Promise<string> {
   try {
-    return await readFile(filePath, 'utf-8')
+    return await readFile(filePath, 'utf-8');
   } catch (_error) {
-    return ''
+    return '';
   }
 }
 
 describe('Monorepo Support', () => {
   beforeEach(async () => {
-    await rm(TEMP_DIR, { recursive: true, force: true })
-    await mkdir(TEMP_DIR, { recursive: true })
-  })
+    await rm(TEMP_DIR, { recursive: true, force: true });
+    await mkdir(TEMP_DIR, { recursive: true });
+  });
 
   afterEach(async () => {
-    await rm(TEMP_DIR, { recursive: true, force: true })
-  })
+    await rm(TEMP_DIR, { recursive: true, force: true });
+  });
 
   test('Move file within same package updates cross-package imports', async () => {
-    const tempFixturePath = await createTempFixture('bun-monorepo')
-    const mover = new TypeScriptFileMover(tempFixturePath)
-    await mover.init()
+    const tempFixturePath = await createTempFixture('bun-monorepo');
+    const mover = new TypeScriptFileMover(tempFixturePath);
+    await mover.init();
 
     // Move user.ts from types to entities directory within core package
-    const sourceFile = 'packages/core/src/types/user.ts'
-    const targetFile = 'packages/core/src/entities/user.ts'
+    const sourceFile = 'packages/core/src/types/user.ts';
+    const targetFile = 'packages/core/src/entities/user.ts';
 
-    await mover.moveFile(sourceFile, targetFile)
+    await mover.moveFile(sourceFile, targetFile);
 
     // Verify file was moved
-    expect(existsSync(join(tempFixturePath, targetFile))).toBe(true)
-    expect(existsSync(join(tempFixturePath, sourceFile))).toBe(false)
+    expect(existsSync(join(tempFixturePath, targetFile))).toBe(true);
+    expect(existsSync(join(tempFixturePath, sourceFile))).toBe(false);
 
     // Check that import within the same package was updated
-    const validationContent = await readFileContent(join(tempFixturePath, 'packages/core/src/utils/validation.ts'))
-    expect(validationContent).toContain("import { User, UserRole, CreateUserRequest } from '../entities/user';")
+    const validationContent = await readFileContent(join(tempFixturePath, 'packages/core/src/utils/validation.ts'));
+    expect(validationContent).toContain("import { User, UserRole, CreateUserRequest } from '../entities/user';");
 
     // Check that imports in other packages were updated (these use path mapping)
-    const _userCardContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/components/UserCard.tsx'))
+    const _userCardContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/components/UserCard.tsx'));
     // This should still work because it uses @test-monorepo/core/types/user but now resolves to entities/user
     // The tool should update the path mapping reference or the relative import should be updated
     // For now, let's check if the file structure allows the import to resolve
-    expect(validationContent).not.toBe('')
-  })
+    expect(validationContent).not.toBe('');
+  });
 
   test('Move file from one package to another updates all references', async () => {
-    const tempFixturePath = await createTempFixture('bun-monorepo')
-    const mover = new TypeScriptFileMover(tempFixturePath)
-    await mover.init()
+    const tempFixturePath = await createTempFixture('bun-monorepo');
+    const mover = new TypeScriptFileMover(tempFixturePath);
+    await mover.init();
 
     // Move validation.ts from core package to ui package (since UI uses it heavily)
-    const sourceFile = 'packages/core/src/utils/validation.ts'
-    const targetFile = 'packages/ui/src/utils/validation.ts'
+    const sourceFile = 'packages/core/src/utils/validation.ts';
+    const targetFile = 'packages/ui/src/utils/validation.ts';
 
-    await mover.moveFile(sourceFile, targetFile)
+    await mover.moveFile(sourceFile, targetFile);
 
     // Verify file was moved
-    expect(existsSync(join(tempFixturePath, targetFile))).toBe(true)
-    expect(existsSync(join(tempFixturePath, sourceFile))).toBe(false)
+    expect(existsSync(join(tempFixturePath, targetFile))).toBe(true);
+    expect(existsSync(join(tempFixturePath, sourceFile))).toBe(false);
 
     // The moved file should now import from its new relative location to user types
-    const movedValidationContent = await readFileContent(join(tempFixturePath, targetFile))
-    expect(movedValidationContent).toContain("import { User, UserRole, CreateUserRequest } from '../types/user';")
+    const movedValidationContent = await readFileContent(join(tempFixturePath, targetFile));
+    expect(movedValidationContent).toContain("import { User, UserRole, CreateUserRequest } from '../types/user';");
 
     // Check that the core package index file was updated to not export validation
-    const _coreIndexContent = await readFileContent(join(tempFixturePath, 'packages/core/src/index.ts'))
+    const _coreIndexContent = await readFileContent(join(tempFixturePath, 'packages/core/src/index.ts'));
     // Note: Our tool doesn't automatically update index.ts exports, but the import paths should be updated
 
     // Check that UI components can now import validation locally
-    const userFormContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/forms/UserForm.tsx'))
+    const userFormContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/forms/UserForm.tsx'));
     // This should now import from local utils instead of @test-monorepo/core
-    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '../utils/validation';")
+    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '../utils/validation';");
 
     // Check that API package imports were updated to reference UI package
     const userRepositoryContent = await readFileContent(
       join(tempFixturePath, 'packages/api/src/services/user-repository.ts'),
-    )
+    );
     // This is complex - the API package would now need to depend on UI package for validation
     // Or we need to handle cross-package imports differently
     expect(userRepositoryContent).toContain(
       "import { UserValidator, ValidationError, isValidUser } from '../../../ui/src/utils/validation';",
-    )
-  })
+    );
+  });
 
   test('Move file affects workspace dependencies correctly', async () => {
-    const tempFixturePath = await createTempFixture('bun-monorepo')
-    const mover = new TypeScriptFileMover(tempFixturePath)
-    await mover.init()
+    const tempFixturePath = await createTempFixture('bun-monorepo');
+    const mover = new TypeScriptFileMover(tempFixturePath);
+    await mover.init();
 
     // Create a new shared utilities file in core
-    const sharedUtilsFile = join(tempFixturePath, 'packages/core/src/utils/string-utils.ts')
+    const sharedUtilsFile = join(tempFixturePath, 'packages/core/src/utils/string-utils.ts');
     await writeFile(
       sharedUtilsFile,
       `
@@ -130,10 +130,10 @@ export const truncate = (str: string, length: number): string => {
   return str.length <= length ? str : str.slice(0, length) + '...';
 };
 `,
-    )
+    );
 
     // Add usage in UI package
-    const uiUtilsFile = join(tempFixturePath, 'packages/ui/src/components/UserDisplay.tsx')
+    const uiUtilsFile = join(tempFixturePath, 'packages/ui/src/components/UserDisplay.tsx');
     await writeFile(
       uiUtilsFile,
       `
@@ -149,10 +149,10 @@ export const UserDisplay: React.FC<{ user: User }> = ({ user }) => {
   );
 };
 `,
-    )
+    );
 
     // Add usage in API package
-    const apiUtilsFile = join(tempFixturePath, 'packages/api/src/utils/formatting.ts')
+    const apiUtilsFile = join(tempFixturePath, 'packages/api/src/utils/formatting.ts');
     await writeFile(
       apiUtilsFile,
       `
@@ -167,10 +167,10 @@ export const formatUserDisplayName = (user: User): string => {
   return capitalize(user.name);
 };
 `,
-    )
+    );
 
     // Add usage in web app
-    const webUtilsFile = join(tempFixturePath, 'apps/web/src/utils/display.ts')
+    const webUtilsFile = join(tempFixturePath, 'apps/web/src/utils/display.ts');
     await writeFile(
       webUtilsFile,
       `
@@ -185,35 +185,35 @@ export const formatUserForDisplay = (user: User) => {
   };
 };
 `,
-    )
+    );
 
     // Now move the string-utils file to a different location within core
-    await mover.moveFile('packages/core/src/utils/string-utils.ts', 'packages/core/src/shared/string-utils.ts')
+    await mover.moveFile('packages/core/src/utils/string-utils.ts', 'packages/core/src/shared/string-utils.ts');
 
     // Verify all imports were updated
-    const uiDisplayContent = await readFileContent(uiUtilsFile)
+    const uiDisplayContent = await readFileContent(uiUtilsFile);
     expect(uiDisplayContent).toContain(
       "import { capitalize, truncate } from '@test-monorepo/core/shared/string-utils';",
-    )
+    );
 
-    const apiFormattingContent = await readFileContent(apiUtilsFile)
+    const apiFormattingContent = await readFileContent(apiUtilsFile);
     expect(apiFormattingContent).toContain(
       "import { slugify, capitalize } from '@test-monorepo/core/shared/string-utils';",
-    )
+    );
 
-    const webDisplayContent = await readFileContent(webUtilsFile)
+    const webDisplayContent = await readFileContent(webUtilsFile);
     expect(webDisplayContent).toContain(
       "import { capitalize, truncate, slugify } from '@test-monorepo/core/shared/string-utils';",
-    )
-  })
+    );
+  });
 
   test('Move file between packages in complex dependency tree', async () => {
-    const tempFixturePath = await createTempFixture('bun-monorepo')
-    const mover = new TypeScriptFileMover(tempFixturePath)
-    await mover.init()
+    const tempFixturePath = await createTempFixture('bun-monorepo');
+    const mover = new TypeScriptFileMover(tempFixturePath);
+    await mover.init();
 
     // Create a user service file in API package
-    const userServiceFile = join(tempFixturePath, 'packages/api/src/services/user-service.ts')
+    const userServiceFile = join(tempFixturePath, 'packages/api/src/services/user-service.ts');
     await writeFile(
       userServiceFile,
       `
@@ -239,10 +239,10 @@ export class UserService {
   }
 }
 `,
-    )
+    );
 
     // Use this service in the web app
-    const userServiceUsage = join(tempFixturePath, 'apps/web/src/hooks/useUserService.ts')
+    const userServiceUsage = join(tempFixturePath, 'apps/web/src/hooks/useUserService.ts');
     await writeFile(
       userServiceUsage,
       `
@@ -258,35 +258,35 @@ export const useUserService = () => {
   return service;
 };
 `,
-    )
+    );
 
     // Now move the UserService to the core package (making it more reusable)
-    await mover.moveFile('packages/api/src/services/user-service.ts', 'packages/core/src/services/user-service.ts')
+    await mover.moveFile('packages/api/src/services/user-service.ts', 'packages/core/src/services/user-service.ts');
 
     // Check that the moved file now imports UserController from the API package
     const movedServiceContent = await readFileContent(
       join(tempFixturePath, 'packages/core/src/services/user-service.ts'),
-    )
+    );
     expect(movedServiceContent).toContain(
       "import { UserController } from '../../../api/src/controllers/user-controller';",
-    )
+    );
 
     // Check that the web app now imports from core instead of api
-    const webHookContent = await readFileContent(userServiceUsage)
-    expect(webHookContent).toContain("import { UserService } from '@test-monorepo/core/services/user-service';")
+    const webHookContent = await readFileContent(userServiceUsage);
+    expect(webHookContent).toContain("import { UserService } from '@test-monorepo/core/services/user-service';");
 
     // The UserController import should remain the same since it's still in API
-    expect(webHookContent).toContain("import { UserController } from '@test-monorepo/api';")
-  })
+    expect(webHookContent).toContain("import { UserController } from '@test-monorepo/api';");
+  });
 
   test('Handle index.ts re-exports in monorepo', async () => {
-    const tempFixturePath = await createTempFixture('bun-monorepo')
-    const mover = new TypeScriptFileMover(tempFixturePath)
-    await mover.init()
+    const tempFixturePath = await createTempFixture('bun-monorepo');
+    const mover = new TypeScriptFileMover(tempFixturePath);
+    await mover.init();
 
     // Create a new types file that gets re-exported
-    const apiTypesFile = join(tempFixturePath, 'packages/api/src/types/api-types.ts')
-    await mkdir(dirname(apiTypesFile), { recursive: true })
+    const apiTypesFile = join(tempFixturePath, 'packages/api/src/types/api-types.ts');
+    await mkdir(dirname(apiTypesFile), { recursive: true });
     await writeFile(
       apiTypesFile,
       `
@@ -313,15 +313,15 @@ export interface PaginatedResponse<T> {
   };
 }
 `,
-    )
+    );
 
     // Update API package index to export these types
-    const apiIndexFile = join(tempFixturePath, 'packages/api/src/index.ts')
-    const currentApiIndex = await readFileContent(apiIndexFile)
-    await writeFile(apiIndexFile, `${currentApiIndex}\nexport * from "./types/api-types";`)
+    const apiIndexFile = join(tempFixturePath, 'packages/api/src/index.ts');
+    const currentApiIndex = await readFileContent(apiIndexFile);
+    await writeFile(apiIndexFile, `${currentApiIndex}\nexport * from "./types/api-types";`);
 
     // Use these types in the web app
-    const webApiClientFile = join(tempFixturePath, 'apps/web/src/services/api-client.ts')
+    const webApiClientFile = join(tempFixturePath, 'apps/web/src/services/api-client.ts');
     await writeFile(
       webApiClientFile,
       `
@@ -350,30 +350,30 @@ export class ApiClient {
   }
 }
 `,
-    )
+    );
 
     // Move the API types to core package (more fundamental)
-    await mover.moveFile('packages/api/src/types/api-types.ts', 'packages/core/src/types/api-types.ts')
+    await mover.moveFile('packages/api/src/types/api-types.ts', 'packages/core/src/types/api-types.ts');
 
     // Check that API index.ts was updated to import from core
-    const updatedApiIndex = await readFileContent(apiIndexFile)
-    expect(updatedApiIndex).toContain('export * from "../../../core/src/types/api-types";')
+    const updatedApiIndex = await readFileContent(apiIndexFile);
+    expect(updatedApiIndex).toContain('export * from "../../../core/src/types/api-types";');
 
     // Check that web app import was updated
-    const webApiClientContent = await readFileContent(webApiClientFile)
+    const webApiClientContent = await readFileContent(webApiClientFile);
     expect(webApiClientContent).toContain(
       "import { ApiError, PaginationParams, PaginatedResponse } from '@test-monorepo/core/types/api-types';",
-    )
-  })
+    );
+  });
 
   test('Complex scenario: Move file that affects multiple packages and has circular-ish dependencies', async () => {
-    const tempFixturePath = await createTempFixture('bun-monorepo')
-    const mover = new TypeScriptFileMover(tempFixturePath)
-    await mover.init()
+    const tempFixturePath = await createTempFixture('bun-monorepo');
+    const mover = new TypeScriptFileMover(tempFixturePath);
+    await mover.init();
 
     // Create an events system in core
-    const eventsFile = join(tempFixturePath, 'packages/core/src/events/user-events.ts')
-    await mkdir(dirname(eventsFile), { recursive: true })
+    const eventsFile = join(tempFixturePath, 'packages/core/src/events/user-events.ts');
+    await mkdir(dirname(eventsFile), { recursive: true });
     await writeFile(
       eventsFile,
       `
@@ -419,19 +419,19 @@ export class UserEventEmitter {
 
 export const userEventEmitter = new UserEventEmitter();
 `,
-    )
+    );
 
     // Update core index to export events
-    const coreIndexFile = join(tempFixturePath, 'packages/core/src/index.ts')
-    const currentCoreIndex = await readFileContent(coreIndexFile)
-    await writeFile(coreIndexFile, `${currentCoreIndex}\nexport * from "./events/user-events";`)
+    const coreIndexFile = join(tempFixturePath, 'packages/core/src/index.ts');
+    const currentCoreIndex = await readFileContent(coreIndexFile);
+    await writeFile(coreIndexFile, `${currentCoreIndex}\nexport * from "./events/user-events";`);
 
     // Use events in API package
-    const updatedUserController = join(tempFixturePath, 'packages/api/src/controllers/user-controller.ts')
-    let userControllerContent = await readFileContent(updatedUserController)
+    const updatedUserController = join(tempFixturePath, 'packages/api/src/controllers/user-controller.ts');
+    let userControllerContent = await readFileContent(updatedUserController);
     userControllerContent =
       `import { userEventEmitter, UserCreatedEvent, UserUpdatedEvent, UserDeletedEvent } from '@test-monorepo/core/events/user-events';
-${userControllerContent}`
+${userControllerContent}`;
 
     // Add event emission to create user method (simplified update)
     userControllerContent = userControllerContent.replace(
@@ -446,12 +446,12 @@ ${userControllerContent}`
         success: true,
         data: user
       };`,
-    )
+    );
 
-    await writeFile(updatedUserController, userControllerContent)
+    await writeFile(updatedUserController, userControllerContent);
 
     // Use events in UI package for notifications
-    const notificationHook = join(tempFixturePath, 'packages/ui/src/hooks/useUserNotifications.ts')
+    const notificationHook = join(tempFixturePath, 'packages/ui/src/hooks/useUserNotifications.ts');
     await writeFile(
       notificationHook,
       `
@@ -483,10 +483,10 @@ export const useUserNotifications = () => {
   }, []);
 };
 `,
-    )
+    );
 
     // Use events in web app
-    const webEventHandler = join(tempFixturePath, 'apps/web/src/components/EventListener.tsx')
+    const webEventHandler = join(tempFixturePath, 'apps/web/src/components/EventListener.tsx');
     await writeFile(
       webEventHandler,
       `
@@ -499,31 +499,31 @@ export const EventListener: React.FC = () => {
   return null; // This is just an event listener component
 };
 `,
-    )
+    );
 
     // Now move the events file to a more specific location
-    await mover.moveFile('packages/core/src/events/user-events.ts', 'packages/core/src/domain/user-events.ts')
+    await mover.moveFile('packages/core/src/events/user-events.ts', 'packages/core/src/domain/user-events.ts');
 
     // Verify all imports were updated across packages
-    const updatedCoreIndex = await readFileContent(coreIndexFile)
-    expect(updatedCoreIndex).toContain('export * from "./domain/user-events";')
+    const updatedCoreIndex = await readFileContent(coreIndexFile);
+    expect(updatedCoreIndex).toContain('export * from "./domain/user-events";');
 
-    const updatedControllerContent = await readFileContent(updatedUserController)
+    const updatedControllerContent = await readFileContent(updatedUserController);
     expect(updatedControllerContent).toContain(
       "import { userEventEmitter, UserCreatedEvent, UserUpdatedEvent, UserDeletedEvent } from '@test-monorepo/core/domain/user-events';",
-    )
+    );
 
-    const updatedNotificationHookContent = await readFileContent(notificationHook)
+    const updatedNotificationHookContent = await readFileContent(notificationHook);
     expect(updatedNotificationHookContent).toContain(
       "import { userEventEmitter, AllUserEvents } from '@test-monorepo/core/domain/user-events';",
-    )
+    );
 
     // Web app should import from the updated core export
-    const updatedWebEventHandlerContent = await readFileContent(webEventHandler)
-    expect(updatedWebEventHandlerContent).toContain("import { userEventEmitter } from '@test-monorepo/core';")
-  })
-})
+    const updatedWebEventHandlerContent = await readFileContent(webEventHandler);
+    expect(updatedWebEventHandlerContent).toContain("import { userEventEmitter } from '@test-monorepo/core';");
+  });
+});
 
 if (import.meta.main) {
-  console.log('Running monorepo move-ts tests...')
+  console.log('Running monorepo move-ts tests...');
 }

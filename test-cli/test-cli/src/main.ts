@@ -1,1 +1,1 @@
-import { test } from './lib/test'
+import { test } from './lib/test';

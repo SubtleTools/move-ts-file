@@ -1,122 +1,122 @@
-import { UserController } from '@test-monorepo/api'
-import { CreateUserRequest, User, UserRole } from '@test-monorepo/core'
-import { UserCard, UserForm } from '@test-monorepo/ui'
+import { UserController } from '@test-monorepo/api';
+import { CreateUserRequest, User, UserRole } from '@test-monorepo/core';
+import { UserCard, UserForm } from '@test-monorepo/ui';
 
 interface UserManagementPageProps {
-  userController?: UserController
+  userController?: UserController;
 }
 
 export const UserManagementPage: React.FC<UserManagementPageProps> = ({
   userController = new UserController(),
 }) => {
-  const [users, setUsers] = React.useState<User[]>([])
-  const [loading, setLoading] = React.useState(false)
-  const [showForm, setShowForm] = React.useState(false)
-  const [editingUser, setEditingUser] = React.useState<User | null>(null)
-  const [error, setError] = React.useState<string | null>(null)
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [showForm, setShowForm] = React.useState(false);
+  const [editingUser, setEditingUser] = React.useState<User | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    loadUsers()
-  }, [])
+    loadUsers();
+  }, []);
 
   const loadUsers = async (): Promise<void> => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const response = await userController.getAllUsers()
+      const response = await userController.getAllUsers();
       if (response.success && response.data) {
-        setUsers(response.data)
+        setUsers(response.data);
       } else {
-        setError(response.error || 'Failed to load users')
+        setError(response.error || 'Failed to load users');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCreateUser = async (userData: CreateUserRequest): Promise<void> => {
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const response = await userController.createUser(userData)
+      const response = await userController.createUser(userData);
       if (response.success && response.data) {
-        setUsers(prev => [...prev, response.data!])
-        setShowForm(false)
+        setUsers(prev => [...prev, response.data!]);
+        setShowForm(false);
       } else {
-        setError(response.error || 'Failed to create user')
+        setError(response.error || 'Failed to create user');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleEditUser = (user: User): void => {
-    setEditingUser(user)
-    setShowForm(true)
-  }
+    setEditingUser(user);
+    setShowForm(true);
+  };
 
   const handleUpdateUser = async (userData: CreateUserRequest): Promise<void> => {
-    if (!editingUser) return
+    if (!editingUser) return;
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const response = await userController.updateUser(editingUser.id, userData)
+      const response = await userController.updateUser(editingUser.id, userData);
       if (response.success && response.data) {
-        setUsers(prev => prev.map(user => user.id === editingUser.id ? response.data! : user))
-        setShowForm(false)
-        setEditingUser(null)
+        setUsers(prev => prev.map(user => user.id === editingUser.id ? response.data! : user));
+        setShowForm(false);
+        setEditingUser(null);
       } else {
-        setError(response.error || 'Failed to update user')
+        setError(response.error || 'Failed to update user');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleDeleteUser = async (userId: string): Promise<void> => {
-    if (!confirm('Are you sure you want to delete this user?')) return
+    if (!confirm('Are you sure you want to delete this user?')) return;
 
-    setLoading(true)
-    setError(null)
+    setLoading(true);
+    setError(null);
     try {
-      const response = await userController.deleteUser(userId)
+      const response = await userController.deleteUser(userId);
       if (response.success) {
-        setUsers(prev => prev.filter(user => user.id !== userId))
+        setUsers(prev => prev.filter(user => user.id !== userId));
       } else {
-        setError(response.error || 'Failed to delete user')
+        setError(response.error || 'Failed to delete user');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCancelForm = (): void => {
-    setShowForm(false)
-    setEditingUser(null)
-  }
+    setShowForm(false);
+    setEditingUser(null);
+  };
 
   const getUsersByRole = (role: UserRole): User[] => {
-    return users.filter(user => user.role === role)
-  }
+    return users.filter(user => user.role === role);
+  };
 
   const getTotalUserCount = (): number => {
-    return users.length
-  }
+    return users.length;
+  };
 
   const getActiveUserCount = (): number => {
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-    return users.filter(user => user.updatedAt >= thirtyDaysAgo).length
-  }
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return users.filter(user => user.updatedAt >= thirtyDaysAgo).length;
+  };
 
   return (
     <div className='user-management-page p-6'>
@@ -194,5 +194,5 @@ export const UserManagementPage: React.FC<UserManagementPageProps> = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};

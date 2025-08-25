@@ -1,16 +1,16 @@
-import { EmailRule, RequiredRule } from '../../utils/validation/rules'
-import { TextInput } from '../ui/inputs/TextInput'
+import { EmailRule, RequiredRule } from '../../utils/validation/rules';
+import { TextInput } from '../ui/inputs/TextInput';
 
 export interface UserFormData {
-  username: string
-  email: string
-  fullName: string
+  username: string;
+  email: string;
+  fullName: string;
 }
 
 export interface UserFormProps {
-  initialData?: Partial<UserFormData>
-  onSubmit: (data: UserFormData) => void
-  loading?: boolean
+  initialData?: Partial<UserFormData>;
+  onSubmit: (data: UserFormData) => void;
+  loading?: boolean;
 }
 
 export const UserForm: React.FC<UserFormProps> = ({
@@ -22,47 +22,47 @@ export const UserForm: React.FC<UserFormProps> = ({
     username: initialData?.username || '',
     email: initialData?.email || '',
     fullName: initialData?.fullName || '',
-  })
+  });
 
-  const [errors, setErrors] = React.useState<Partial<Record<keyof UserFormData, string>>>({})
+  const [errors, setErrors] = React.useState<Partial<Record<keyof UserFormData, string>>>({});
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof UserFormData, string>> = {}
+    const newErrors: Partial<Record<keyof UserFormData, string>> = {};
 
-    const requiredRule = new RequiredRule()
-    const emailRule = new EmailRule()
+    const requiredRule = new RequiredRule();
+    const emailRule = new EmailRule();
 
     if (!requiredRule.validate(formData.username)) {
-      newErrors.username = requiredRule.message
+      newErrors.username = requiredRule.message;
     }
 
     if (!requiredRule.validate(formData.email)) {
-      newErrors.email = requiredRule.message
+      newErrors.email = requiredRule.message;
     } else if (!emailRule.validate(formData.email)) {
-      newErrors.email = emailRule.message
+      newErrors.email = emailRule.message;
     }
 
     if (!requiredRule.validate(formData.fullName)) {
-      newErrors.fullName = requiredRule.message
+      newErrors.fullName = requiredRule.message;
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData)
+      onSubmit(formData);
     }
-  }
+  };
 
   const updateField = (field: keyof UserFormData) => (value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }))
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className='user-form'>
@@ -107,5 +107,5 @@ export const UserForm: React.FC<UserFormProps> = ({
         {loading ? 'Submitting...' : 'Submit'}
       </button>
     </form>
-  )
-}
+  );
+};

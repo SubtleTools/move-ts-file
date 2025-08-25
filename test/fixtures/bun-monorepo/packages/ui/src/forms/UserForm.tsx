@@ -1,12 +1,12 @@
-import { CreateUserRequest, UpdateUserRequest, UserRole } from '@test-monorepo/core'
-import { UserValidator, ValidationError } from '@test-monorepo/core/utils/validation'
+import { CreateUserRequest, UpdateUserRequest, UserRole } from '@test-monorepo/core';
+import { UserValidator, ValidationError } from '@test-monorepo/core/utils/validation';
 
 export interface UserFormProps {
-  initialData?: UpdateUserRequest
-  onSubmit: (data: CreateUserRequest) => void
-  onCancel?: () => void
-  loading?: boolean
-  mode?: 'create' | 'edit'
+  initialData?: UpdateUserRequest;
+  onSubmit: (data: CreateUserRequest) => void;
+  onCancel?: () => void;
+  loading?: boolean;
+  mode?: 'create' | 'edit';
 }
 
 export const UserForm: React.FC<UserFormProps> = ({
@@ -20,35 +20,35 @@ export const UserForm: React.FC<UserFormProps> = ({
     name: initialData?.name || '',
     email: initialData?.email || '',
     role: initialData?.role || UserRole.USER,
-  })
+  });
 
-  const [errors, setErrors] = React.useState<ValidationError[]>([])
+  const [errors, setErrors] = React.useState<ValidationError[]>([]);
 
   const validateForm = (): boolean => {
-    const validation = UserValidator.validateCreateUserRequest(formData)
-    setErrors(validation.errors)
-    return validation.isValid
-  }
+    const validation = UserValidator.validateCreateUserRequest(formData);
+    setErrors(validation.errors);
+    return validation.isValid;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (validateForm()) {
-      onSubmit(formData)
+      onSubmit(formData);
     }
-  }
+  };
 
   const updateField = <K extends keyof CreateUserRequest>(
     field: K,
     value: CreateUserRequest[K],
   ) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData(prev => ({ ...prev, [field]: value }));
     // Clear errors for this field
-    setErrors(prev => prev.filter(error => error.field !== field))
-  }
+    setErrors(prev => prev.filter(error => error.field !== field));
+  };
 
   const getFieldError = (field: string): string | undefined => {
-    return errors.find(error => error.field === field)?.message
-  }
+    return errors.find(error => error.field === field)?.message;
+  };
 
   return (
     <form onSubmit={handleSubmit} className='user-form space-y-4'>
@@ -128,5 +128,5 @@ export const UserForm: React.FC<UserFormProps> = ({
         )}
       </div>
     </form>
-  )
-}
+  );
+};
