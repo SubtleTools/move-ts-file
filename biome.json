@@ -1,7 +1,7 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
   "files": {
-    "includes": ["*.{js,jsx,ts,tsx,json}", "test/specs/**/*.{js,jsx,ts,tsx,json}", ".github/**/*.{yml,yaml}"],
+    "includes": ["*.{js,jsx,ts,tsx}", "test/specs/**/*.{js,jsx,ts,tsx}"],
     "ignoreUnknown": false
   },
   "vcs": {
@@ -43,28 +43,11 @@
     }
   },
   "formatter": {
-    "enabled": true,
-    "formatWithErrors": false,
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineWidth": 120,
-    "lineEnding": "lf",
-    "attributePosition": "auto"
+    "enabled": false
   },
   "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "trailingCommas": "es5",
-      "semicolons": "asNeeded"
-    },
     "parser": {
       "unsafeParameterDecoratorsEnabled": true
-    }
-  },
-  "json": {
-    "formatter": {
-      "enabled": true,
-      "trailingCommas": "none"
     }
   },
   "overrides": [

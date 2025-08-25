@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* biome-ignore assist/source/organizeImports: Keep imports in dprint order */
 import { glob } from 'glob'
 import { existsSync, renameSync } from 'node:fs'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
