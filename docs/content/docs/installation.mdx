@@ -5,13 +5,34 @@ description: How to install move-ts-file CLI tool
 
 ## Installation
 
-You can install `move-ts-file` globally via npm or use it directly with npx.
+You can install `move-ts-file` globally with your preferred package manager or use it directly without installation.
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ### Global Installation
 
+<Tabs>
+<TabItem label="npm">
 ```bash
 npm install -g move-ts-file
 ```
+</TabItem>
+<TabItem label="yarn">
+```bash
+yarn global add move-ts-file
+```
+</TabItem>
+<TabItem label="pnpm">
+```bash
+pnpm add -g move-ts-file
+```
+</TabItem>
+<TabItem label="bun">
+```bash
+bun add -g move-ts-file
+```
+</TabItem>
+</Tabs>
 
 Then use it anywhere:
 
@@ -19,27 +40,32 @@ Then use it anywhere:
 move-ts-file src/old-file.ts src/new-file.ts
 ```
 
-### Use with npx (Recommended)
+### Use without Installation (Recommended)
 
-No installation required - use it directly:
+No installation required - use it directly with your package manager's runner:
 
+<Tabs>
+<TabItem label="npx">
 ```bash
 npx move-ts-file src/old-file.ts src/new-file.ts
 ```
-
-### Bun Installation
-
-If you're using Bun:
-
+</TabItem>
+<TabItem label="yarn dlx">
 ```bash
-bun add -g move-ts-file
+yarn dlx move-ts-file src/old-file.ts src/new-file.ts
 ```
-
-Or use with bunx:
-
+</TabItem>
+<TabItem label="pnpm dlx">
+```bash
+pnpm dlx move-ts-file src/old-file.ts src/new-file.ts
+```
+</TabItem>
+<TabItem label="bunx">
 ```bash
 bunx move-ts-file src/old-file.ts src/new-file.ts
 ```
+</TabItem>
+</Tabs>
 
 ## Requirements
 

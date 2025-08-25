@@ -34,58 +34,143 @@ Works out of the box with any TypeScript project. No complex configuration files
 ### 🧪 Battle-Tested
 Comprehensive test suite with 47+ tests covering edge cases, monorepo scenarios, and complex import patterns.
 
-## Quick Example
+## It even updates barrel row indexes!
+
+When you move files that are re-exported by barrel files, move-ts-file intelligently updates the entire dependency tree to maintain clean import paths.
 
 ```bash
-# Move a file and update all imports automatically
-npx move-ts-file src/utils/helper.ts src/shared/helper.ts
+# Move a utility file that's re-exported by a barrel
+npx move-ts-file src/utils/validation.ts src/shared/validation.ts
+```
 
-# Move to directory (keeps same filename)  
-move-ts-file src/components/Button.tsx shared/ui/
+### Before: Original Dependency Tree
 
-# Works with complex monorepo paths too
-move-ts-file packages/core/src/types/user.ts packages/shared/src/types/user.ts
+```d2
+direction: right
+
+src/components/UserForm.tsx -> src/utils/index.ts: "import { validateEmail }"
+src/services/auth.ts -> src/utils/index.ts: "import { validateEmail }"
+src/utils/index.ts -> src/utils/validation.ts: "export { validateEmail }"
+
+src/utils/validation.ts: {
+  shape: rectangle
+  style: {
+    fill: "#fef3c7"
+    stroke: "#f59e0b"
+  }
+}
+
+src/utils/index.ts: {
+  shape: rectangle
+  style: {
+    fill: "#dbeafe"
+    stroke: "#3b82f6"
+  }
+}
+
+src/components/UserForm.tsx: {
+  shape: rectangle
+  style: {
+    fill: "#f3e8ff"
+    stroke: "#8b5cf6"
+  }
+}
+
+src/services/auth.ts: {
+  shape: rectangle
+  style: {
+    fill: "#f3e8ff"
+    stroke: "#8b5cf6"
+  }
+}
+```
+
+### After: Updated Dependency Tree
+
+```d2
+direction: right
+
+src/components/UserForm.tsx -> src/utils/index.ts: "import { validateEmail }"
+src/services/auth.ts -> src/utils/index.ts: "import { validateEmail }"
+src/utils/index.ts -> src/shared/validation.ts: "export { validateEmail }"
+
+src/shared/validation.ts: {
+  shape: rectangle
+  style: {
+    fill: "#dcfce7"
+    stroke: "#22c55e"
+  }
+}
+
+src/utils/index.ts: {
+  shape: rectangle
+  style: {
+    fill: "#dbeafe"
+    stroke: "#3b82f6"
+  }
+}
+
+src/components/UserForm.tsx: {
+  shape: rectangle
+  style: {
+    fill: "#f3e8ff"
+    stroke: "#8b5cf6"
+  }
+}
+
+src/services/auth.ts: {
+  shape: rectangle
+  style: {
+    fill: "#f3e8ff"
+    stroke: "#8b5cf6"
+  }
+}
+
+moved_file: {
+  shape: text
+  style: {
+    font-color: "#22c55e"
+    font-size: 12
+    bold: true
+  }
+}
+moved_file: "✅ Moved to src/shared/validation.ts!"
 ```
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 <Tabs>
-<TabItem label="Before">
+<TabItem label="What Happens">
 
-**src/components/UserCard.tsx**
-```typescript
-import { formatUser } from '@/utils/formatter';
-import { helper } from '../utils/helper.js';
-```
-
-**src/utils/index.ts** *(barrel file)*
-```typescript
-export { helper } from './helper.js';
-export { validation } from './validation.js';
-```
+1. **File moved**: `src/utils/validation.ts` → `src/shared/validation.ts`
+2. **Barrel updated**: The barrel file `src/utils/index.ts` now points to the new location
+3. **Consumer files unchanged**: Files importing from the barrel continue to work without modification
+4. **Zero breaking changes**: Your public API remains stable
 
 </TabItem>
-<TabItem label="After">
+<TabItem label="Code Changes">
 
-**src/components/UserCard.tsx** *(Updated automatically)*
+**src/utils/index.ts** *(automatically updated)*
 ```typescript
-import { formatUser } from '@/utils/formatter'; // ✅ Unchanged  
-import { helper } from '../shared/helper.js'; // ✅ Updated path
+// Before
+export { validateEmail } from './validation.js';
+
+// After  
+export { validateEmail } from '../shared/validation.js'; // ✅ Updated path
 ```
 
-**src/utils/index.ts** *(Barrel export updated)*
+**src/components/UserForm.tsx** *(no changes needed)*
 ```typescript
-export { helper } from '../shared/helper.js'; // ✅ Points to new location
-export { validation } from './validation.js';  // ✅ Other exports unchanged
+import { validateEmail } from '../utils'; // ✅ Still works!
 ```
 
 </TabItem>
 </Tabs>
 
-**Key Features Demonstrated:**
-- ✅ **Smart Import Updates**: All references automatically updated
-- ✅ **Barrel Export Management**: Index files updated to point to new locations  
-- ✅ **Style Preservation**: Maintains your existing import patterns
-- ✅ **Zero Breaking Changes**: Components importing from barrels still work
+**Why This Matters:**
+- 🎯 **Stable APIs**: Internal refactoring doesn't break your public interfaces
+- 🚀 **Confident Refactoring**: Move files without fear of breaking imports
+- 🤖 **Perfect for AI**: Let AI assistants refactor while maintaining code integrity  
+- ⚡ **Zero Downtime**: No need to update dozens of import statements across your codebase
 
 Ready to get started? [Install move-ts-file](/installation/) and begin moving files with confidence.
