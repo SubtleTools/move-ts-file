@@ -11,6 +11,7 @@
   "scripts": {
     "build": "bun build src/move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
     "generate-types": "bun tsc",
+    "docs": "bunx typedoc --out docs/api --entryPoints src/index.ts --plugin typedoc-plugin-markdown --theme markdown",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "format": "dprint fmt",

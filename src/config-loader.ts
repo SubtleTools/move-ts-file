@@ -6,12 +6,35 @@ import type { PackageImportsInfo, PathMappingInfo } from './types.js';
 
 /**
  * Loads configuration from tsconfig.json and package.json files
+ *
+ * This class scans the project directory for configuration files and extracts
+ * TypeScript path mappings and Node.js package imports that are used for
+ * resolving import statements.
  */
 export class ConfigLoader {
+  /**
+   * Creates a new ConfigLoader instance
+   *
+   * @param projectRoot - Absolute path to the project root directory
+   */
   constructor(private projectRoot: string) {}
 
   /**
-   * Loads TypeScript path mappings from all tsconfig.json files in the project.
+   * Loads TypeScript path mappings from all tsconfig.json files in the project
+   *
+   * Scans for all tsconfig*.json files and extracts the 'paths' configuration
+   * from the compilerOptions. These path mappings are used to resolve imports
+   * like '@/components/*' to actual file paths.
+   *
+   * @returns Map where keys are alias patterns and values are arrays of path mapping info
+   * @throws Logs warnings for invalid tsconfig.json files but continues processing
+   *
+   * @example
+   * ```typescript
+   * const loader = new ConfigLoader('/project');
+   * const paths = await loader.loadTsConfigPaths();
+   * // paths.get('@/*') might return [{ alias: '@/*', pathPattern: './src/', ... }]
+   * ```
    */
   async loadTsConfigPaths(): Promise<Map<string, PathMappingInfo[]>> {
     const tsConfigPaths = new Map<string, PathMappingInfo[]>();
@@ -56,7 +79,21 @@ export class ConfigLoader {
   }
 
   /**
-   * Loads Node.js package imports from all package.json files in the project.
+   * Loads Node.js package imports from all package.json files in the project
+   *
+   * Scans for all package.json files and extracts the 'imports' field which defines
+   * Node.js subpath imports (imports that start with '#'). These are used to resolve
+   * imports like '#internal/utils' to actual file paths.
+   *
+   * @returns Array of package imports information from all package.json files
+   * @throws Logs warnings for invalid package.json files but continues processing
+   *
+   * @example
+   * ```typescript
+   * const loader = new ConfigLoader('/project');
+   * const imports = await loader.loadPackageImports();
+   * // imports[0].imports.get('#internal/*') might return './src/internal/*'
+   * ```
    */
   async loadPackageImports(): Promise<PackageImportsInfo[]> {
     const packageImports: PackageImportsInfo[] = [];

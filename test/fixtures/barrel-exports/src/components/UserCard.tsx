@@ -1,5 +1,5 @@
 // Import from barrel index
-import { User, formatUserName } from '../utils/index.js';
+import { formatUserName, User } from '../utils/index.js';
 
 export interface UserCardProps {
   user: User;
@@ -8,7 +8,7 @@ export interface UserCardProps {
 
 export const UserCard: React.FC<UserCardProps> = ({ user, onClick }) => {
   return (
-    <div className="user-card" onClick={onClick}>
+    <div className='user-card' onClick={onClick}>
       <h3>{formatUserName(user)}</h3>
       <p>ID: {user.id}</p>
     </div>

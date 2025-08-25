@@ -39,7 +39,7 @@ describe('Barrel Export Handling', () => {
 
   test('Updates barrel exports when moving a file (updateBarrels: true)', async () => {
     const tempFixturePath = await createTempFixture('barrel-exports');
-    
+
     // Create mover with barrel updates enabled (default)
     const mover = new TypeScriptFileMover(tempFixturePath, { updateBarrels: true });
     await mover.init();
@@ -59,19 +59,21 @@ describe('Barrel Export Handling', () => {
 
     // Check that barrel export was updated
     const utilsIndexContent = await readFileContent(join(tempFixturePath, 'src/utils/index.ts'));
-    expect(utilsIndexContent).toContain("export { formatUserName, User, UserService, validateEmail } from '../shared/helper.js';");
-    
+    expect(utilsIndexContent).toContain(
+      "export { formatUserName, User, UserService, validateEmail } from '../shared/helper.js';",
+    );
+
     // Check that imports from the barrel still work (components should not need updating)
     const userCardContent = await readFileContent(join(tempFixturePath, 'src/components/UserCard.tsx'));
-    expect(userCardContent).toContain("import { User, formatUserName } from '../utils/index.js';");
-    
+    expect(userCardContent).toContain("import { formatUserName, User } from '../utils/index.js';");
+
     const userFormContent = await readFileContent(join(tempFixturePath, 'src/components/UserForm.tsx'));
-    expect(userFormContent).toContain("import { User, required, isEmail } from '../utils/index.js';");
+    expect(userFormContent).toContain("import { isEmail, required, User } from '../utils/index.js';");
   });
 
   test('Does not update barrel exports when disabled (updateBarrels: false)', async () => {
     const tempFixturePath = await createTempFixture('barrel-exports');
-    
+
     // Create mover with barrel updates disabled
     const mover = new TypeScriptFileMover(tempFixturePath, { updateBarrels: false });
     await mover.init();
@@ -92,12 +94,14 @@ describe('Barrel Export Handling', () => {
     // Check that barrel export was NOT updated (should still reference old path)
     const utilsIndexContent = await readFileContent(join(tempFixturePath, 'src/utils/index.ts'));
     expect(utilsIndexContent).toBe(originalBarrelContent);
-    expect(utilsIndexContent).toContain("export { formatUserName, User, UserService, validateEmail } from './helper.js';");
+    expect(utilsIndexContent).toContain(
+      "export { formatUserName, User, UserService, validateEmail } from './helper.js';",
+    );
   });
 
   test('Updates multiple barrel exports when file is re-exported in several places', async () => {
     const tempFixturePath = await createTempFixture('barrel-exports');
-    
+
     // Add an additional barrel that re-exports validation
     const additionalBarrelPath = join(tempFixturePath, 'src/forms/index.ts');
     await mkdir(dirname(additionalBarrelPath), { recursive: true });
@@ -119,12 +123,15 @@ describe('Barrel Export Handling', () => {
 
   test('Handles star exports in barrel files', async () => {
     const tempFixturePath = await createTempFixture('barrel-exports');
-    
+
     // Modify utils index to use star export
     const utilsIndexPath = join(tempFixturePath, 'src/utils/index.ts');
-    await writeFile(utilsIndexPath, `// Barrel file with star exports
+    await writeFile(
+      utilsIndexPath,
+      `// Barrel file with star exports
 export * from './helper.js';
-export * from './validation.js';`);
+export * from './validation.js';`,
+    );
 
     const mover = new TypeScriptFileMover(tempFixturePath, { updateBarrels: true });
     await mover.init();
@@ -140,7 +147,7 @@ export * from './validation.js';`);
 
   test('Preserves import style in components when barrel is updated', async () => {
     const tempFixturePath = await createTempFixture('barrel-exports');
-    
+
     const mover = new TypeScriptFileMover(tempFixturePath, { updateBarrels: true });
     await mover.init();
 
@@ -154,7 +161,7 @@ export * from './validation.js';`);
     // Components should remain unchanged since they import from the barrel
     const newUserCardContent = await readFileContent(join(tempFixturePath, 'src/components/UserCard.tsx'));
     const newUserFormContent = await readFileContent(join(tempFixturePath, 'src/components/UserForm.tsx'));
-    
+
     expect(newUserCardContent).toBe(originalUserCardContent);
     expect(newUserFormContent).toBe(originalUserFormContent);
   });

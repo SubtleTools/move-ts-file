@@ -87,21 +87,23 @@ Supports all TypeScript import patterns:
 
 ```typescript
 // Before: src/utils/index.ts
-export { User, formatUserName } from './helper.js';
+export { formatUserName, User } from './helper.js';
 export { validateEmail } from './validation.js';
 
 // After moving src/utils/helper.ts → src/shared/helper.ts
-export { User, formatUserName } from '../shared/helper.js';  // ✅ Updated
-export { validateEmail } from './validation.js';             // ✅ Unchanged
+export { formatUserName, User } from '../shared/helper.js'; // ✅ Updated
+export { validateEmail } from './validation.js'; // ✅ Unchanged
 ```
 
 **How it works:**
+
 - **Enabled by default**: Barrel exports are automatically updated
 - **Preserves imports**: Components importing from barrels don't need changes
 - **Multi-level support**: Handles nested barrel exports across directories
 - **Star export support**: Works with `export *` statements
 
 **Control the behavior:**
+
 ```bash
 # Default: Updates barrel exports automatically
 move-ts-file src/utils/helper.ts src/shared/helper.ts
@@ -169,6 +171,7 @@ import { ApiService } from '@my-app/core/service';     # After ✅
 ```
 
 **Key benefits:**
+
 - **Preserves workspace imports** instead of converting to relative paths
 - **Handles cross-package moves** automatically
 - **Works with any workspace setup** (npm, yarn, pnpm, bun workspaces)
@@ -222,24 +225,27 @@ Handles complex barrel export scenarios automatically:
 ```typescript
 // src/components/index.ts (barrel file)
 export { Button } from './Button.js';
-export { Modal } from './Modal.js';
 export { Card } from './Card.js';
+export { Modal } from './Modal.js';
 
 // src/App.tsx (imports from barrel)
 import { Button, Modal } from './components/index.js';
 ```
 
 **When you move a file:**
+
 ```bash
 move-ts-file src/components/Button.tsx src/ui/Button.tsx
 ```
 
 **What happens:**
+
 1. **Barrel is updated**: `export { Button } from '../ui/Button.js';`
 2. **App.tsx unchanged**: Still imports from `./components/index.js`
 3. **Zero breaking changes**: All imports continue to work
 
 **Advanced scenarios:**
+
 ```bash
 # Move between packages with barrel preservation
 move-ts-file packages/ui/src/Button.tsx packages/shared/src/Button.tsx
@@ -250,8 +256,9 @@ move-ts-file src/Button.tsx src/shared/Button.tsx --no-update-barrels
 ```
 
 **Perfect for:**
+
 - Large refactoring projects with established barrel patterns
-- Maintaining API stability during internal reorganization  
+- Maintaining API stability during internal reorganization
 - Monorepo restructuring without breaking consuming packages
 
 ## 🤖 Integration with AI Coding Assistants

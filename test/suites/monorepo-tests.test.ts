@@ -90,7 +90,9 @@ describe('Monorepo Support', () => {
     // Check that UI components can now import validation from ui workspace
     const userFormContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/forms/UserForm.tsx'));
     // This should now import from ui package workspace import instead of core package
-    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '@test-monorepo/ui/utils/validation';");
+    expect(userFormContent).toContain(
+      "import { UserValidator, ValidationError } from '@test-monorepo/ui/utils/validation';",
+    );
 
     // Check that API package imports were updated to reference UI package
     const userRepositoryContent = await readFileContent(

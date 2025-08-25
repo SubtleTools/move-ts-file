@@ -36,12 +36,9 @@ jobs:
         
       - name: Generate TypeScript documentation
         run: |
-          # Install typedoc globally for API documentation
-          npm install -g typedoc
-          
-          # Generate API docs
+          # Generate API docs using local typedoc installation
           mkdir -p docs/api
-          typedoc --out docs/api --entryPoints move-ts.ts --plugin typedoc-plugin-markdown --theme markdown
+          bunx typedoc --out docs/api --entryPoints src/index.ts --plugin typedoc-plugin-markdown --theme markdown
           
       - name: Create documentation site
         run: |

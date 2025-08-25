@@ -10,8 +10,15 @@ import { ImportAnalyzer } from './import-analyzer.js';
 import { PackageImportsResolver } from './package-imports-resolver.js';
 import { RelativePathResolver } from './path-resolver.js';
 import { TsConfigPathResolver } from './tsconfig-path-resolver.js';
+import type {
+  BarrelAnalysisResult,
+  FileUpdate,
+  ImportReference,
+  ImportTypeInfo,
+  PackageImportsInfo,
+  PathMappingInfo,
+} from './types.js';
 import { WorkspaceResolver } from './workspace-resolver.js';
-import type { BarrelAnalysisResult, FileUpdate, ImportReference, ImportTypeInfo, PackageImportsInfo, PathMappingInfo } from './types.js';
 
 /**
  * A powerful TypeScript file mover that intelligently handles import path updates.
@@ -70,7 +77,7 @@ export class TypeScriptFileMover {
     this.configLoader = new ConfigLoader(projectRoot);
     this.importAnalyzer = new ImportAnalyzer();
     this.relativeResolver = new RelativePathResolver();
-    
+
     // Initialize barrel analyzer if requested
     if (this.options.updateBarrels) {
       this.barrelAnalyzer = new BarrelAnalyzer(projectRoot);

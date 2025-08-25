@@ -39,10 +39,10 @@ describe('Workspace Import Resolution', () => {
 
     // Use the internal resolveImportPath method to test resolution
     const resolvedPath = (mover as any).resolveImportPath('@test-monorepo/core/types/user', testFile);
-    
+
     console.log('Resolved path:', resolvedPath);
     console.log('Expected path should contain:', 'packages/core/src/types/user');
-    
+
     // Should resolve to the actual file path
     expect(resolvedPath).toBeTruthy();
     expect(resolvedPath).toContain('packages/core/src/types/user');
@@ -63,9 +63,9 @@ describe('Workspace Import Resolution', () => {
 
     // Test the calculateNewImportPath method
     const newImportPath = (mover as any).calculateNewImportPath(
-      '@test-monorepo/core/types/user', 
+      '@test-monorepo/core/types/user',
       testFile,
-      { newPath }
+      { newPath },
     );
 
     console.log('Original import:', '@test-monorepo/core/types/user');
@@ -91,9 +91,9 @@ describe('Workspace Import Resolution', () => {
 
     // Test the calculateNewImportPath method for cross-package move
     const newImportPath = (mover as any).calculateNewImportPath(
-      '@test-monorepo/api/services/user-service', 
+      '@test-monorepo/api/services/user-service',
       testFile,
-      { newPath }
+      { newPath },
     );
 
     console.log('Original import:', '@test-monorepo/api/services/user-service');

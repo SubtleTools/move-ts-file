@@ -335,7 +335,9 @@ export class TypeTest {
     // Files that imported from the core package should now import from ui
     const userFormContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/forms/UserForm.tsx'));
     // Should now use workspace import to ui package
-    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '@test-monorepo/ui/validation/validation';");
+    expect(userFormContent).toContain(
+      "import { UserValidator, ValidationError } from '@test-monorepo/ui/validation/validation';",
+    );
   });
 
   test('Complex monorepo scenario with multiple moves', async () => {
@@ -355,7 +357,9 @@ export class TypeTest {
 
     // Check that UI components now use workspace import to ui package
     const userFormContent = await readFileContent(join(tempFixturePath, 'packages/ui/src/forms/UserForm.tsx'));
-    expect(userFormContent).toContain("import { UserValidator, ValidationError } from '@test-monorepo/ui/utils/validation';");
+    expect(userFormContent).toContain(
+      "import { UserValidator, ValidationError } from '@test-monorepo/ui/utils/validation';",
+    );
 
     // Check that API package imports are updated to use workspace imports
     const userRepositoryContent = await readFileContent(
