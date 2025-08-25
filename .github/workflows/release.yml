@@ -16,7 +16,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
           
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -44,7 +43,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
           
       - name: Setup Bun
@@ -64,6 +62,7 @@ jobs:
         
       - name: Update package.json version
         run: |
+          npm install
           npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
           
       - name: Create GitHub Release
