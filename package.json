@@ -9,12 +9,12 @@
     "move-ts-file": "./bin/move-ts-file.js"
   },
   "scripts": {
-    "build": "bun build lib/move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
+    "build": "bun build src/move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
     "build:docs": "astro build",
     "dev:docs": "astro dev",
     "preview:docs": "astro preview",
     "generate-types": "bun tsc",
-    "docs": "bunx typedoc --out docs/api --entryPoints lib/index.ts --plugin typedoc-plugin-markdown --theme markdown",
+    "docs": "bunx typedoc --out docs/api --entryPoints src/index.ts --plugin typedoc-plugin-markdown --theme markdown",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "format": "dprint fmt",
@@ -83,7 +83,7 @@
     "bun": ">=1.0.0"
   },
   "imports": {
-    "#src": "./lib/index.ts",
-    "#src/*": "./lib/*"
+    "#src": "./src/index.ts",
+    "#src/*": "./src/*"
   }
 }

@@ -4,6 +4,8 @@ import starlightImageZoom from 'starlight-image-zoom';
 
 // https://astro.build/config
 export default defineConfig({
+  srcDir: './docs',
+  outDir: './dist-docs',
   site: 'https://subtletools.github.io',
   base: '/move-ts-file',
   integrations: [

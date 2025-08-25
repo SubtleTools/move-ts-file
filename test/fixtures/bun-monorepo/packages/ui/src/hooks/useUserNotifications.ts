@@ -1,4 +1,4 @@
-import { userEventEmitter, AllUserEvents } from '@test-monorepo/core/events/user-events';
+import { AllUserEvents, userEventEmitter } from '@test-monorepo/core/events/user-events';
 
 export const useUserNotifications = () => {
   React.useEffect(() => {

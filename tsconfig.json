@@ -6,7 +6,7 @@
     "lib": ["es2020"],
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./lib",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -17,10 +17,10 @@
     "allowImportingTsExtensions": false,
     "baseUrl": ".",
     "paths": {
-      "#src": ["./lib/index.ts"],
-      "#src/*": ["./lib/*"]
+      "#src": ["./src/index.ts"],
+      "#src/*": ["./src/*"]
     }
   },
-  "include": ["lib/**/*", "src/**/*"],
-  "exclude": ["node_modules", "test", "dist"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "test", "dist", "dist-docs", "docs"]
 }
