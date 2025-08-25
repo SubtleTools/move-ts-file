@@ -1,0 +1,62 @@
+---
+title: Installation
+description: How to install move-ts-file CLI tool
+---
+
+## Installation
+
+You can install `move-ts-file` globally via npm or use it directly with npx.
+
+### Global Installation
+
+```bash
+npm install -g move-ts-file
+```
+
+Then use it anywhere:
+
+```bash
+move-ts-file src/old-file.ts src/new-file.ts
+```
+
+### Use with npx (Recommended)
+
+No installation required - use it directly:
+
+```bash
+npx move-ts-file src/old-file.ts src/new-file.ts
+```
+
+### Bun Installation
+
+If you're using Bun:
+
+```bash
+bun add -g move-ts-file
+```
+
+Or use with bunx:
+
+```bash
+bunx move-ts-file src/old-file.ts src/new-file.ts
+```
+
+## Requirements
+
+- **Node.js 18+** or **Bun 1.0+**
+- **TypeScript project** with `.ts` or `.tsx` files
+- Valid TypeScript syntax (the tool uses TypeScript AST parsing)
+
+## Verify Installation
+
+Check that the tool is installed correctly:
+
+```bash
+move-ts-file --version
+```
+
+You should see the current version number.
+
+## Next Steps
+
+Now that you have move-ts-file installed, check out the [Quick Start](/quick-start/) guide to learn the basics.

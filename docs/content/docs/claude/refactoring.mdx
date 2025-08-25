@@ -1,0 +1,104 @@
+---
+title: AI-Assisted Refactoring
+description: Using move-ts-file with Claude Code and other AI assistants
+---
+
+## AI-Assisted Refactoring
+
+`move-ts-file` is designed to work seamlessly with AI coding assistants like Claude Code, Cursor, and GitHub Copilot. This enables powerful refactoring workflows where AI can focus on architecture while the tool handles the tedious import updates.
+
+## How It Works
+
+1. **You request** a refactoring from your AI assistant
+2. **AI analyzes** your codebase and plans the refactoring
+3. **AI executes** `move-ts-file` commands to move files safely
+4. **AI continues** with additional changes, confident imports are correct
+
+## Example Workflow with Claude Code
+
+```
+You: "I want to reorganize my components into feature-based directories"
+
+Claude: "I'll help you refactor this. Let me start by moving the Button component:"
+
+Claude: [executes] move-ts-file src/components/Button.tsx src/features/ui/Button.tsx
+
+Claude: "Great! Now I'll move the related hook and update the exports..."
+
+Claude: [executes] move-ts-file src/hooks/useButton.ts src/features/ui/hooks/useButton.ts
+```
+
+## Benefits for AI Workflows
+
+### Reduced Context Usage
+- AI doesn't waste tokens manually updating imports
+- More context available for architectural decisions
+- Faster completion of complex refactoring tasks
+
+### Higher Confidence
+- AI can focus on code structure and logic
+- No risk of missing import updates
+- Consistent results across large refactoring projects
+
+### Fewer Iterations
+- Less back-and-forth to fix broken imports
+- AI can proceed with confidence after file moves
+- Complex refactoring completes in fewer interactions
+
+## Setting Up CLAUDE.md
+
+Add move-ts-file to your project's `CLAUDE.md` file:
+
+```markdown
+# Development Commands
+
+- **Move TypeScript files**: `move-ts-file <source> <destination>`
+- **Move with debug output**: `move-ts-file --debug <source> <destination>`
+- **Preview changes**: `move-ts-file --dry-run <source> <destination>`
+
+## Refactoring Guidelines
+
+When refactoring with move-ts-file:
+1. Use move-ts-file for all TypeScript file moves
+2. Let the tool handle import updates automatically
+3. Run tests after major refactoring to verify functionality
+```
+
+## Integration with Other AI Tools
+
+### Cursor
+- Use in terminal or through Cursor's command palette
+- AI can execute shell commands directly
+- Perfect for large-scale refactoring projects
+
+### GitHub Copilot
+- Use in VS Code terminal
+- Copilot can suggest move-ts-file commands
+- Great for cleaning up after AI-generated code
+
+### Aider
+- Integrates naturally with aider's file-moving capabilities
+- Can be added to aider's tool repertoire
+- Excellent for systematic refactoring
+
+## Best Practices
+
+1. **Let AI plan, tool execute**: Have AI analyze and plan, then use move-ts-file for execution
+2. **Test after moves**: Always run tests after significant file moves
+3. **Use debug mode**: Enable `--debug` when troubleshooting AI-assisted moves
+4. **Document patterns**: Add common move patterns to your CLAUDE.md or project docs
+
+## Example Commands AI Might Use
+
+```bash
+# Reorganize by feature
+move-ts-file src/components/UserProfile.tsx src/features/user/components/UserProfile.tsx
+
+# Extract shared utilities
+move-ts-file src/utils/api.ts packages/shared/src/api.ts
+
+# Clean up after code generation
+move-ts-file src/generated/types.ts src/types/api-types.ts
+```
+
+This workflow enables AI assistants to perform complex architectural changes while maintaining code quality and import integrity.

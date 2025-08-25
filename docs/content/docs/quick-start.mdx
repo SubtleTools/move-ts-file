@@ -1,0 +1,95 @@
+---
+title: Quick Start
+description: Get started with move-ts-file in minutes
+---
+
+## Quick Start
+
+Get up and running with `move-ts-file` in just a few commands.
+
+## Basic Usage
+
+The basic syntax is simple:
+
+```bash
+move-ts-file <source-file> <destination>
+```
+
+### Example 1: Move to a different directory
+
+```bash
+npx move-ts-file src/components/Button.tsx src/ui/Button.tsx
+```
+
+This will:
+- Move the file from `src/components/Button.tsx` to `src/ui/Button.tsx`
+- Find all files that import Button
+- Update their import paths automatically
+
+### Example 2: Move and rename
+
+```bash
+npx move-ts-file utils/helper.ts lib/string-utils.ts
+```
+
+### Example 3: Move to a directory
+
+```bash
+npx move-ts-file src/components/Button.tsx shared/ui/
+# Results in: shared/ui/Button.tsx
+```
+
+## Common Options
+
+### Debug Mode
+
+Use `--debug` to see detailed information about what the tool is doing:
+
+```bash
+npx move-ts-file --debug src/old.ts src/new.ts
+```
+
+### Dry Run Mode
+
+Use `--dry-run` to see what would happen without making changes:
+
+```bash
+npx move-ts-file --dry-run src/old.ts src/new.ts
+```
+
+### Disable Barrel Updates
+
+Use `--no-update-barrels` if you don't want barrel exports updated:
+
+```bash
+npx move-ts-file --no-update-barrels src/old.ts src/new.ts
+```
+
+## What Gets Updated
+
+When you move a file, the tool automatically:
+
+1. **Moves the physical file** to the new location
+2. **Finds all imports** of the moved file across your project
+3. **Updates import paths** to point to the new location
+4. **Updates barrel exports** (index.ts re-exports) if applicable
+5. **Preserves import styles** (relative, absolute, workspace imports)
+
+## Example Output
+
+```bash
+$ npx move-ts-file src/utils/helper.ts src/lib/helper.ts
+
+Moving src/utils/helper.ts to src/lib/helper.ts
+Updated imports in: src/components/UserCard.tsx
+Updated imports in: src/services/api.ts
+Updated imports in: tests/helper.test.ts
+Updated barrel exports in: src/utils/index.ts
+Successfully moved file and updated 4 files with import changes
+```
+
+## Next Steps
+
+- Learn about [Import Style Preservation](/features/import-styles/)
+- Explore [Barrel Export Management](/features/barrel-exports/)
+- Set up [AI-Assisted Refactoring](/claude/refactoring/)

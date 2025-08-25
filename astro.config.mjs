@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightImageZoom from 'starlight-image-zoom';
+import starlightLinksValidator from 'starlight-links-validator';
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,6 +15,8 @@ export default defineConfig({
       plugins: [
         // Add image zoom functionality
         starlightImageZoom({}),
+        // Validate internal links during build
+        starlightLinksValidator(),
       ],
       title: 'move-ts-file',
       description: 'Intelligent CLI tool to move TypeScript files and automatically update all import paths throughout your project',
@@ -37,40 +40,13 @@ export default defineConfig({
           label: 'Features',
           items: [
             { label: 'Import Style Preservation', link: '/features/import-styles/' },
-            { label: 'Path Mappings', link: '/features/path-mappings/' },
-            { label: 'Monorepo Support', link: '/features/monorepo/' },
             { label: 'Barrel Exports', link: '/features/barrel-exports/' },
           ],
         },
         {
-          label: 'Claude Integration',
+          label: 'AI Integration',
           items: [
-            { label: 'CLAUDE.md Setup', link: '/claude/claude-md/' },
-            { label: 'Claude Commands', link: '/claude/commands/' },
             { label: 'AI-Assisted Refactoring', link: '/claude/refactoring/' },
-          ],
-        },
-        {
-          label: 'Configuration',
-          items: [
-            { label: 'TypeScript Config', link: '/config/tsconfig/' },
-            { label: 'Package.json Imports', link: '/config/package-imports/' },
-            { label: 'Monorepo Setup', link: '/config/monorepo/' },
-          ],
-        },
-        {
-          label: 'API Reference',
-          items: [
-            { label: 'TypeScriptFileMover', link: '/api/typescript-file-mover/' },
-            { label: 'Configuration Options', link: '/api/options/' },
-          ],
-        },
-        {
-          label: 'Examples',
-          items: [
-            { label: 'Basic Usage', link: '/examples/basic/' },
-            { label: 'Monorepo Example', link: '/examples/monorepo/' },
-            { label: 'CI/CD Integration', link: '/examples/cicd/' },
           ],
         },
       ],

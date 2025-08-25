@@ -1,0 +1,89 @@
+---
+title: Barrel Exports
+description: Automatic barrel export management when moving files
+---
+
+## Barrel Exports
+
+Barrel files (typically `index.ts`) are a common pattern for re-exporting modules from a directory. When you move a file that's re-exported by a barrel, `move-ts-file` automatically updates the barrel exports.
+
+## What are Barrel Files?
+
+Barrel files re-export modules to create clean import paths:
+
+```typescript
+// src/utils/index.ts (barrel file)
+export { formatUser } from './user-formatter';
+export { validateEmail } from './validation';
+export { Logger } from './logger';
+```
+
+This allows consumers to import from the barrel:
+
+```typescript
+// Consumer file
+import { formatUser, validateEmail } from './utils';
+// Instead of:
+// import { formatUser } from './utils/user-formatter';
+// import { validateEmail } from './utils/validation';
+```
+
+## Automatic Barrel Updates
+
+When you move a file that's re-exported by a barrel, the tool updates the barrel automatically:
+
+```bash
+# Move a file that's re-exported
+npx move-ts-file src/utils/validation.ts src/shared/validation.ts
+```
+
+**Before:**
+```typescript
+// src/utils/index.ts
+export { formatUser } from './user-formatter';
+export { validateEmail } from './validation';  // ← Will be updated
+export { Logger } from './logger';
+```
+
+**After:**
+```typescript
+// src/utils/index.ts
+export { formatUser } from './user-formatter';
+export { validateEmail } from '../shared/validation'; // ✅ Updated path
+export { Logger } from './logger';
+```
+
+## Benefits
+
+1. **Stable API**: Files importing from the barrel don't need to change
+2. **Clean refactoring**: Internal reorganization doesn't break public interfaces
+3. **Zero breaking changes**: Move files without updating dozens of import statements
+
+## Supported Export Types
+
+The tool handles various export patterns:
+
+### Named Exports
+```typescript
+export { Button, ButtonProps } from './Button';
+```
+
+### Star Exports
+```typescript
+export * from './types';
+```
+
+### Mixed Exports
+```typescript
+export { default as Button } from './Button';
+export * from './types';
+export { validateForm } from '../validation/form';
+```
+
+## Disable Barrel Updates
+
+If you prefer manual control over barrel updates:
+
+```bash
+npx move-ts-file --no-update-barrels src/old.ts src/new.ts
+```

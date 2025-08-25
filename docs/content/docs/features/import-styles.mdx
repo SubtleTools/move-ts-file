@@ -1,0 +1,122 @@
+---
+title: Import Style Preservation
+description: How move-ts-file preserves your existing import patterns
+---
+
+## Import Style Preservation
+
+One of the key features of `move-ts-file` is that it preserves your existing import styles whenever possible, rather than forcing everything to use relative imports.
+
+## Supported Import Styles
+
+### Relative Imports
+
+Traditional relative imports are fully supported:
+
+```typescript
+// Before moving
+import { Button } from './Button';
+import { utils } from '../utils/helper';
+
+// After moving src/components/Button.tsx → src/ui/Button.tsx
+import { Button } from '../ui/Button';  // ✅ Updated relative path
+import { utils } from '../utils/helper'; // ✅ Unchanged
+```
+
+### TypeScript Path Mappings
+
+If you use `tsconfig.json` path mappings, they're preserved when possible:
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"]
+    }
+  }
+}
+```
+
+```typescript
+// Before moving
+import { Button } from '@components/Button';
+import { utils } from '@/utils/helper';
+
+// After moving src/components/Button.tsx → src/ui/Button.tsx
+import { Button } from '@/ui/Button';     // ✅ Uses @/* mapping
+import { utils } from '@/utils/helper';   // ✅ Unchanged
+```
+
+### Package Imports (Node.js Subpath Imports)
+
+Modern Node.js package import patterns are supported:
+
+```json
+// package.json
+{
+  "imports": {
+    "#internal/*": "./src/internal/*",
+    "#shared/*": "./src/shared/*"
+  }
+}
+```
+
+```typescript
+// Before moving
+import { utils } from '#internal/utils';
+import { types } from '#shared/types';
+
+// After moving src/internal/utils.ts → src/shared/utils.ts
+import { utils } from '#shared/utils';    // ✅ Uses #shared/* mapping
+import { types } from '#shared/types';    // ✅ Unchanged
+```
+
+### Workspace Imports
+
+In monorepos, workspace package imports are preserved:
+
+```typescript
+// Before moving
+import { User } from '@my-app/core/types/user';
+import { api } from '@my-app/api/client';
+
+// After moving packages/core/src/types/user.ts → packages/core/src/entities/user.ts
+import { User } from '@my-app/core/entities/user'; // ✅ Workspace import preserved
+import { api } from '@my-app/api/client';           // ✅ Unchanged
+```
+
+## Intelligent Fallback
+
+When the original import style can't be preserved (e.g., a file moves outside the scope of a path mapping), the tool falls back to relative imports:
+
+```typescript
+// tsconfig.json paths: "@components/*": ["./src/components/*"]
+
+// Before moving
+import { Button } from '@components/Button';
+
+// After moving src/components/Button.tsx → lib/ui/Button.tsx
+import { Button } from '../lib/ui/Button'; // ✅ Falls back to relative import
+```
+
+## No Forced Conversions
+
+The tool **never** forces conversions between import styles. If you're using relative imports, they stay relative. If you're using path mappings, they stay as path mappings (when possible).
+
+This means:
+- ✅ Your code style remains consistent
+- ✅ No unexpected changes to unrelated files
+- ✅ Import patterns match your project conventions
+
+## Priority Order
+
+When multiple import styles could work for a file, the tool uses this priority order:
+
+1. **Workspace imports** (highest priority in monorepos)
+2. **TypeScript path mappings** 
+3. **Package imports** (Node.js subpath imports)
+4. **Relative imports** (fallback)
+
+This ensures the most appropriate import style is used for your project structure.
