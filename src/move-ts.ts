@@ -5,6 +5,7 @@ import { existsSync, renameSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { BarrelAnalyzer } from './barrel-analyzer.js';
+import { RecursiveBarrelAnalyzer } from './recursive-barrel-analyzer.js';
 import { ConfigLoader } from './config-loader.js';
 import { ImportAnalyzer } from './import-analyzer.js';
 import { PackageImportsResolver } from './package-imports-resolver.js';
@@ -18,6 +19,7 @@ import type {
   PackageImportsInfo,
   PathMappingInfo,
 } from './types.js';
+import type { BarrelMoveResult } from './recursive-barrel-analyzer.js';
 import { WorkspaceResolver } from './workspace-resolver.js';
 
 /**
@@ -45,6 +47,8 @@ import { WorkspaceResolver } from './workspace-resolver.js';
 export interface TypeScriptFileMoverOptions {
   /** Whether to update barrel exports (re-exports) when moving files (default: true) */
   updateBarrels?: boolean;
+  /** If true, show what would be changed without making changes (default: false) */
+  dryRun?: boolean;
 }
 
 export class TypeScriptFileMover {
@@ -56,8 +60,10 @@ export class TypeScriptFileMover {
   private configLoader: ConfigLoader;
   /** Import analyzer */
   private importAnalyzer: ImportAnalyzer;
-  /** Barrel export analyzer */
+  /** Simple barrel analyzer for basic cases */
   private barrelAnalyzer?: BarrelAnalyzer;
+  /** Recursive barrel export analyzer for complex cases */
+  private recursiveBarrelAnalyzer?: RecursiveBarrelAnalyzer;
   /** Path resolvers */
   private tsConfigResolver?: TsConfigPathResolver;
   private packageImportsResolver?: PackageImportsResolver;
@@ -72,16 +78,13 @@ export class TypeScriptFileMover {
    */
   constructor(projectRoot: string = process.cwd(), options: TypeScriptFileMoverOptions = {}) {
     this.projectRoot = projectRoot;
-    // Default updateBarrels to true if not explicitly specified
-    this.options = { updateBarrels: true, ...options };
+    // Default updateBarrels to true and dryRun to false if not explicitly specified
+    this.options = { updateBarrels: true, dryRun: false, ...options };
     this.configLoader = new ConfigLoader(projectRoot);
     this.importAnalyzer = new ImportAnalyzer();
     this.relativeResolver = new RelativePathResolver();
 
-    // Initialize barrel analyzer if requested
-    if (this.options.updateBarrels) {
-      this.barrelAnalyzer = new BarrelAnalyzer(projectRoot);
-    }
+    // Barrel analyzer will be initialized in init() method
   }
 
   /**
@@ -110,6 +113,12 @@ export class TypeScriptFileMover {
     // Always initialize workspace resolver
     this.workspaceResolver = new WorkspaceResolver(this.projectRoot);
     await this.workspaceResolver.init();
+
+    // Initialize barrel analyzers if barrel updates are enabled
+    if (this.options.updateBarrels) {
+      this.barrelAnalyzer = new BarrelAnalyzer(this.projectRoot);
+      this.recursiveBarrelAnalyzer = new RecursiveBarrelAnalyzer(this.projectRoot);
+    }
   }
 
   /**
@@ -146,15 +155,16 @@ export class TypeScriptFileMover {
       throw new Error(`Source must be a TypeScript file (.ts or .tsx): ${sourcePath}`);
     }
 
-    // Check if destination already exists
-    if (existsSync(resolvedDest)) {
+    // Check if destination already exists (skip in dry-run mode)
+    if (!this.options.dryRun && existsSync(resolvedDest)) {
       throw new Error(`Destination already exists: ${resolvedDest}`);
     }
 
-    // Create destination directory if needed
-    await mkdir(dirname(resolvedDest), { recursive: true });
-
-    console.log(`Moving ${sourcePath} to ${resolvedDest}`);
+    if (this.options.dryRun) {
+      console.log(`[DRY RUN] Would move ${sourcePath} to ${resolvedDest}`);
+    } else {
+      console.log(`Moving ${sourcePath} to ${resolvedDest}`);
+    }
 
     // Find all files that might import this file
     const affectedFiles = await this.findAffectedFiles(resolvedSource);
@@ -163,10 +173,28 @@ export class TypeScriptFileMover {
     const updates = await this.calculateImportUpdates(resolvedSource, resolvedDest, affectedFiles);
 
     // Analyze barrel exports BEFORE moving the file
-    let barrelAnalysis: BarrelAnalysisResult | null = null;
-    if (this.barrelAnalyzer) {
-      barrelAnalysis = await this.barrelAnalyzer.analyzeBarrelImpact(resolvedSource, resolvedDest);
+    let barrelAnalysisResult = null;
+    let barrelMoveResult = null;
+    
+    if (this.barrelAnalyzer && this.recursiveBarrelAnalyzer) {
+      // First try simple barrel analysis
+      barrelAnalysisResult = await this.barrelAnalyzer.analyzeBarrelImpact(resolvedSource, resolvedDest);
+      
+      // Use recursive analysis only if we detect complex cross-barrel scenarios
+      if (this.shouldUseRecursiveBarrelHandling(barrelAnalysisResult)) {
+        barrelMoveResult = this.recursiveBarrelAnalyzer.analyzeBarrelMove(resolvedSource, resolvedDest);
+        barrelAnalysisResult = null; // Use only one approach
+      }
     }
+
+    if (this.options.dryRun) {
+      // In dry-run mode, just show what would happen
+      this.showDryRunResults(updates, barrelMoveResult, barrelAnalysisResult);
+      return;
+    }
+
+    // Create destination directory if needed
+    await mkdir(dirname(resolvedDest), { recursive: true });
 
     // Move the file
     renameSync(resolvedSource, resolvedDest);
@@ -176,13 +204,182 @@ export class TypeScriptFileMover {
 
     // Handle barrel exports if enabled
     let barrelUpdatesCount = 0;
-    if (this.barrelAnalyzer && barrelAnalysis && barrelAnalysis.shouldUpdateBarrels) {
-      await this.barrelAnalyzer.updateBarrelExports(barrelAnalysis.affectedBarrels, resolvedDest);
-      barrelUpdatesCount = barrelAnalysis.affectedBarrels.length;
+    if (barrelMoveResult) {
+      await this.executeBarrelMove(barrelMoveResult);
+      barrelUpdatesCount = barrelMoveResult.modifiedFiles.size;
+    } else if (barrelAnalysisResult && this.barrelAnalyzer) {
+      await this.executeSimpleBarrelUpdates(barrelAnalysisResult, resolvedDest);
+      barrelUpdatesCount = barrelAnalysisResult.affectedBarrels.length;
     }
 
     const totalUpdates = updates.length + barrelUpdatesCount;
     console.log(`Successfully moved file and updated ${totalUpdates} files with import changes`);
+  }
+
+  /**
+   * Shows what would be changed in dry-run mode without making actual changes
+   */
+  private showDryRunResults(updates: FileUpdate[], barrelMoveResult: BarrelMoveResult | null, barrelAnalysisResult: BarrelAnalysisResult | null): void {
+    console.log('\n[DRY RUN] The following changes would be made:');
+    
+    // Show regular import updates
+    if (updates.length > 0) {
+      console.log(`\nImport Updates (${updates.length} files):`);
+      for (const update of updates) {
+        const relativePath = relative(this.projectRoot, update.filePath);
+        console.log(`  - ${relativePath}`);
+        for (const ref of update.references) {
+          const newPath = this.calculateNewImportPath(ref.specifier, update.filePath, ref);
+          console.log(`    ${ref.specifier} → ${newPath}`);
+        }
+      }
+    }
+
+    // Show complex barrel updates
+    if (barrelMoveResult && barrelMoveResult.modifiedFiles.size > 0) {
+      console.log(`\nBarrel Updates (${barrelMoveResult.modifiedFiles.size} files):`);
+      
+      if (barrelMoveResult.removedReexports.length > 0) {
+        console.log('  Removed re-exports:');
+        for (const reexport of barrelMoveResult.removedReexports) {
+          const relativePath = relative(this.projectRoot, reexport.barrelFile);
+          console.log(`    - ${relativePath}: ${reexport.exportStatement}`);
+        }
+      }
+      
+      if (barrelMoveResult.addedReexports.length > 0) {
+        console.log('  Added re-exports:');
+        for (const reexport of barrelMoveResult.addedReexports) {
+          const relativePath = relative(this.projectRoot, reexport.barrelFile);
+          const exportStatement = reexport.exportType === 'star' 
+            ? `export * from '${reexport.moduleSpecifier}';`
+            : `export { ${reexport.namedExports?.join(', ') || ''} } from '${reexport.moduleSpecifier}';`;
+          console.log(`    + ${relativePath}: ${exportStatement}`);
+        }
+      }
+      
+      if (barrelMoveResult.importUpdates.length > 0) {
+        console.log('  Import updates from barrel consumers:');
+        for (const update of barrelMoveResult.importUpdates) {
+          const relativePath = relative(this.projectRoot, update.filePath);
+          console.log(`    - ${relativePath}`);
+          console.log(`      ${update.oldImport} → ${update.newImport}`);
+        }
+      }
+    }
+
+    // Show simple barrel updates
+    if (barrelAnalysisResult && barrelAnalysisResult.affectedBarrels.length > 0) {
+      console.log(`\nSimple Barrel Updates (${barrelAnalysisResult.affectedBarrels.length} files):`);
+      for (const barrel of barrelAnalysisResult.affectedBarrels) {
+        const relativePath = relative(this.projectRoot, barrel.filePath);
+        console.log(`  - ${relativePath}: Update ${barrel.exports.length} exports`);
+      }
+    }
+
+    const barrelFiles = barrelMoveResult ? barrelMoveResult.modifiedFiles.size : 
+                      (barrelAnalysisResult ? barrelAnalysisResult.affectedBarrels.length : 0);
+    const totalFiles = updates.length + barrelFiles;
+    console.log(`\nTotal files that would be modified: ${totalFiles}`);
+  }
+
+  /**
+   * Executes barrel move operations: removes from old barrels, adds to new barrels
+   */
+  private async executeBarrelMove(barrelMoveResult: BarrelMoveResult): Promise<void> {
+    // Remove re-exports from old barrels
+    for (const reexport of barrelMoveResult.removedReexports) {
+      await this.removeBarrelReexport(reexport);
+    }
+
+    // Add re-exports to new barrels
+    for (const reexport of barrelMoveResult.addedReexports) {
+      await this.addBarrelReexport(reexport);
+    }
+
+    // Update imports from barrel consumers
+    for (const importUpdate of barrelMoveResult.importUpdates) {
+      await this.updateBarrelConsumerImport(importUpdate);
+    }
+  }
+
+  /**
+   * Removes a re-export statement from a barrel file
+   */
+  private async removeBarrelReexport(reexport: BarrelMoveResult['removedReexports'][0]): Promise<void> {
+    try {
+      const content = await readFile(reexport.barrelFile, 'utf-8');
+      const updatedContent = content.replace(reexport.exportStatement, '').trim();
+      await writeFile(reexport.barrelFile, updatedContent, 'utf-8');
+      
+      const relativePath = relative(this.projectRoot, reexport.barrelFile);
+      console.log(`Removed re-export from barrel: ${relativePath}`);
+    } catch (error) {
+      console.error(`Failed to remove re-export from ${reexport.barrelFile}:`, error);
+    }
+  }
+
+  /**
+   * Adds a re-export statement to a barrel file
+   */
+  private async addBarrelReexport(reexport: BarrelMoveResult['addedReexports'][0]): Promise<void> {
+    try {
+      const content = await readFile(reexport.barrelFile, 'utf-8');
+      const exportStatement = reexport.exportType === 'star' 
+        ? `export * from '${reexport.moduleSpecifier}';`
+        : `export { ${reexport.namedExports?.join(', ') || ''} } from '${reexport.moduleSpecifier}';`;
+      
+      const updatedContent = content.trim() + '\n' + exportStatement + '\n';
+      await writeFile(reexport.barrelFile, updatedContent, 'utf-8');
+      
+      const relativePath = relative(this.projectRoot, reexport.barrelFile);
+      console.log(`Added re-export to barrel: ${relativePath}`);
+    } catch (error) {
+      console.error(`Failed to add re-export to ${reexport.barrelFile}:`, error);
+    }
+  }
+
+  /**
+   * Updates an import statement in a barrel consumer file
+   */
+  private async updateBarrelConsumerImport(importUpdate: BarrelMoveResult['importUpdates'][0]): Promise<void> {
+    try {
+      const content = await readFile(importUpdate.filePath, 'utf-8');
+      const updatedContent = content.replace(importUpdate.oldImport, importUpdate.newImport);
+      await writeFile(importUpdate.filePath, updatedContent, 'utf-8');
+      
+      const relativePath = relative(this.projectRoot, importUpdate.filePath);
+      console.log(`Updated barrel consumer import: ${relativePath}`);
+    } catch (error) {
+      console.error(`Failed to update barrel consumer import in ${importUpdate.filePath}:`, error);
+    }
+  }
+
+  /**
+   * Determines whether to use recursive barrel handling or simple updates
+   */
+  private shouldUseRecursiveBarrelHandling(barrelAnalysisResult: BarrelAnalysisResult): boolean {
+    // For now, use simple barrel handling for all cases
+    // Later we can add logic to detect complex cross-barrel scenarios
+    return false;
+  }
+
+  /**
+   * Executes simple barrel updates using the original BarrelAnalyzer
+   */
+  private async executeSimpleBarrelUpdates(barrelAnalysisResult: BarrelAnalysisResult): Promise<void> {
+    if (!this.barrelAnalyzer) return;
+
+    for (const barrel of barrelAnalysisResult.affectedBarrels) {
+      try {
+        // Update barrel exports to point to new locations
+        await this.barrelAnalyzer.updateBarrelExports(barrel.filePath, barrel.exports);
+        const relativePath = relative(this.projectRoot, barrel.filePath);
+        console.log(`Updated barrel exports: ${relativePath}`);
+      } catch (error) {
+        console.error(`Failed to update barrel ${barrel.filePath}:`, error);
+      }
+    }
   }
 
   private resolveDestination(sourcePath: string, destPath: string): string {
@@ -400,6 +597,30 @@ export class TypeScriptFileMover {
     }
 
     return this.relativeResolver.getImportType(specifier, fromFile) || { type: 'relative' };
+  }
+
+  /**
+   * Determines whether to use recursive barrel handling or simple updates
+   */
+  private shouldUseRecursiveBarrelHandling(barrelAnalysisResult: BarrelAnalysisResult): boolean {
+    // For now, use simple barrel handling for all cases
+    // Later we can add logic to detect complex cross-barrel scenarios
+    return false;
+  }
+
+  /**
+   * Executes simple barrel updates using the original BarrelAnalyzer
+   */
+  private async executeSimpleBarrelUpdates(barrelAnalysisResult: BarrelAnalysisResult, destPath: string): Promise<void> {
+    if (!this.barrelAnalyzer) return;
+    
+    try {
+      // Update barrel exports to point to new locations
+      await this.barrelAnalyzer.updateBarrelExports(barrelAnalysisResult.affectedBarrels, destPath);
+      console.log(`Updated ${barrelAnalysisResult.affectedBarrels.length} barrel exports`);
+    } catch (error) {
+      console.error('Failed to update barrel exports:', error);
+    }
   }
 }
 
