@@ -34,91 +34,10 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
         
-      - name: Generate TypeScript documentation
+      - name: Build Astro documentation site
         run: |
-          # Generate API docs using local typedoc installation
-          mkdir -p docs/api
-          bunx typedoc --out docs/api --entryPoints src/index.ts --plugin typedoc-plugin-markdown --theme markdown
-          
-      - name: Create documentation site
-        run: |
-          mkdir -p docs
-          
-          # Copy main README as index
-          cp README.md docs/index.md
-          
-          # Copy CLAUDE.md for AI integration docs
-          cp CLAUDE.md docs/claude-integration.md
-          
-          # Create a simple index.html for GitHub Pages
-          cat > docs/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>move-ts-file - Documentation</title>
-            <style>
-              body { 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                max-width: 1200px;
-                margin: 0 auto;
-                padding: 2rem;
-                line-height: 1.6;
-              }
-              .nav { margin-bottom: 2rem; }
-              .nav a { 
-                display: inline-block;
-                margin-right: 1rem;
-                padding: 0.5rem 1rem;
-                background: #f0f0f0;
-                text-decoration: none;
-                border-radius: 4px;
-              }
-              .nav a:hover { background: #e0e0e0; }
-            </style>
-          </head>
-          <body>
-            <div class="nav">
-              <a href="#main">Main Documentation</a>
-              <a href="#claude">Claude Integration</a>
-              <a href="api/">API Documentation</a>
-            </div>
-            
-            <div id="main">
-              <h1>move-ts-file Documentation</h1>
-              <p>Welcome to the move-ts-file documentation. Choose a section:</p>
-              <ul>
-                <li><a href="#main">Main Documentation</a> - Complete usage guide</li>
-                <li><a href="#claude">Claude Code Integration</a> - AI-assisted development</li>
-                <li><a href="api/">API Documentation</a> - TypeScript API reference</li>
-              </ul>
-            </div>
-            
-            <script>
-              // Simple client-side routing for different docs
-              const hash = window.location.hash;
-              if (hash === '#claude') {
-                fetch('claude-integration.md')
-                  .then(r => r.text())
-                  .then(md => {
-                    // Simple markdown to HTML conversion for basic display
-                    document.getElementById('main').innerHTML = 
-                      '<div class="markdown">' + md.replace(/\n/g, '<br>') + '</div>';
-                  });
-              } else if (hash === '' || hash === '#main') {
-                fetch('index.md')
-                  .then(r => r.text())
-                  .then(md => {
-                    // Simple markdown to HTML conversion for basic display
-                    document.getElementById('main').innerHTML = 
-                      '<div class="markdown">' + md.replace(/\n/g, '<br>') + '</div>';
-                  });
-              }
-            </script>
-          </body>
-          </html>
-          EOF
+          # Build the Astro site
+          bun run build:docs
           
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -126,7 +45,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './docs'
+          path: './dist'
 
   deploy:
     environment:

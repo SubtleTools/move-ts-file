@@ -9,9 +9,12 @@
     "move-ts-file": "./bin/move-ts-file.js"
   },
   "scripts": {
-    "build": "bun build src/move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
+    "build": "bun build lib/move-ts.ts --outfile=bin/move-ts-file.js --target=node && bun run generate-types",
+    "build:docs": "astro build",
+    "dev:docs": "astro dev",
+    "preview:docs": "astro preview",
     "generate-types": "bun tsc",
-    "docs": "bunx typedoc --out docs/api --entryPoints src/index.ts --plugin typedoc-plugin-markdown --theme markdown",
+    "docs": "bunx typedoc --out docs/api --entryPoints lib/index.ts --plugin typedoc-plugin-markdown --theme markdown",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "format": "dprint fmt",
@@ -33,9 +36,17 @@
     "typescript": "^5.3.3"
   },
   "devDependencies": {
+    "@astrojs/starlight": "^0.35.2",
+    "@astrojs/tailwind": "^6.0.2",
     "@biomejs/biome": "^2.2.2",
     "@types/node": "^20.10.6",
+    "astro": "^5.13.3",
     "dprint": "^0.50.1",
+    "starlight-image-zoom": "^0.13.0",
+    "starlight-kbd": "^0.2.0",
+    "starlight-links-validator": "^0.17.1",
+    "starlight-typedoc": "^0.21.3",
+    "tailwindcss": "^4.1.12",
     "typedoc": "^0.28.11",
     "typedoc-plugin-frontmatter": "^1.3.0",
     "typedoc-plugin-markdown": "^4.8.1"
@@ -72,7 +83,7 @@
     "bun": ">=1.0.0"
   },
   "imports": {
-    "#src": "./src/index.ts",
-    "#src/*": "./src/*"
+    "#src": "./lib/index.ts",
+    "#src/*": "./lib/*"
   }
 }

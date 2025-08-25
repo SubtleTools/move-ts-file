@@ -156,18 +156,31 @@ export { formatUserName as formatUser } from './utils/helper';
     await mover.init();
 
     // Test: Source file doesn't exist
-    await expect(mover.moveFile('non-existent.ts', 'dest.ts')).rejects.toThrow('Source file does not exist');
+    try {
+      await mover.moveFile('non-existent.ts', 'dest.ts');
+      expect().fail('Expected error to be thrown for non-existent file');
+    } catch (error) {
+      expect(error.message).toContain('Source file does not exist');
+    }
 
     // Test: Destination already exists
-    await expect(mover.moveFile('src/utils/helper.ts', 'src/components/UserCard.tsx')).rejects.toThrow(
-      'Destination already exists',
-    );
+    try {
+      await mover.moveFile('src/utils/helper.ts', 'src/components/UserCard.tsx');
+      expect().fail('Expected error to be thrown for existing destination');
+    } catch (error) {
+      expect(error.message).toContain('Destination already exists');
+    }
 
     // Test: Non-TypeScript file
     const jsFile = join(tempFixturePath, 'test.js');
     await writeFile(jsFile, 'console.log("test");');
 
-    await expect(mover.moveFile('test.js', 'dest.ts')).rejects.toThrow('Source must be a TypeScript file');
+    try {
+      await mover.moveFile('test.js', 'dest.ts');
+      expect().fail('Expected error to be thrown for non-TypeScript file');
+    } catch (error) {
+      expect(error.message).toContain('Source must be a TypeScript file');
+    }
   });
 
   test('No imports scenario - isolated file', async () => {

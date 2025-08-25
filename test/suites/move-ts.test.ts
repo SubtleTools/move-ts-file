@@ -189,7 +189,12 @@ describe('TypeScriptFileMover', () => {
     const mover = new TypeScriptFileMover(tempFixturePath);
     await mover.init();
 
-    await expect(mover.moveFile('non-existent.ts', 'dest.ts')).rejects.toThrow('Source file does not exist');
+    try {
+      await mover.moveFile('non-existent.ts', 'dest.ts');
+      expect().fail('Expected error to be thrown');
+    } catch (error) {
+      expect(error.message).toContain('Source file does not exist');
+    }
   });
 
   test('Error handling - destination already exists', async () => {
@@ -197,9 +202,12 @@ describe('TypeScriptFileMover', () => {
     const mover = new TypeScriptFileMover(tempFixturePath);
     await mover.init();
 
-    await expect(mover.moveFile('src/utils/helper.ts', 'src/components/UserCard.tsx')).rejects.toThrow(
-      'Destination already exists',
-    );
+    try {
+      await mover.moveFile('src/utils/helper.ts', 'src/components/UserCard.tsx');
+      expect().fail('Expected error to be thrown');
+    } catch (error) {
+      expect(error.message).toContain('Destination already exists');
+    }
   });
 
   test('Error handling - non-TypeScript file', async () => {
@@ -212,7 +220,12 @@ describe('TypeScriptFileMover', () => {
     const mover = new TypeScriptFileMover(tempFixturePath);
     await mover.init();
 
-    await expect(mover.moveFile('test.js', 'dest.ts')).rejects.toThrow('Source must be a TypeScript file');
+    try {
+      await mover.moveFile('test.js', 'dest.ts');
+      expect().fail('Expected error to be thrown');
+    } catch (error) {
+      expect(error.message).toContain('Source must be a TypeScript file');
+    }
   });
 
   test('No updates when no imports found', async () => {
