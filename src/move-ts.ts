@@ -450,5 +450,8 @@ async function main(): Promise<void> {
 
 // Export the class for programmatic usage (already handled by export above)
 
-// Always run main when this script is executed (for CLI usage)
-main();
+// Run main when this script is executed as a CLI (not when imported)
+// For bundled code, check if we're the main module using process.argv[1] 
+if (process.argv[1]?.endsWith('move-ts-file.js') || process.argv[1]?.endsWith('move-ts-file')) {
+  main();
+}
