@@ -450,7 +450,5 @@ async function main(): Promise<void> {
 
 // Export the class for programmatic usage (already handled by export above)
 
-// Check if this file is being run directly (using import.meta for ES modules)
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+// Always run main when this script is executed (for CLI usage)
+main();
