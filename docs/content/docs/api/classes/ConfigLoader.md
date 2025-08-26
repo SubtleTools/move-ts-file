@@ -67,7 +67,7 @@ const imports = await loader.loadPackageImports();
 // imports[0].imports.get('#internal/*') might return './src/internal/*'
 ```
 
----
+***
 
 ### loadTsConfigPaths()
 

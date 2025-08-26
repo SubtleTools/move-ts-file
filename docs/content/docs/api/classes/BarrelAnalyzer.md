@@ -10,11 +10,10 @@ Defined in: [barrel-analyzer.ts:20](https://github.com/SubtleTools/move-ts-file/
 Analyzes barrel exports (re-exports) in TypeScript files and tracks dependencies.
 
 A barrel file is typically an index.ts that re-exports from other modules:
-
 ```typescript
 export { Button } from './components/Button.ts';
-export { default as Logger } from './services/logger.ts';
 export * from './utils/helper.ts';
+export { default as Logger } from './services/logger.ts';
 ```
 
 This analyzer helps detect when moving a file breaks barrel exports and
@@ -72,7 +71,7 @@ The destination path (absolute path)
 
 Analysis of affected barrel exports and transitive imports
 
----
+***
 
 ### updateBarrelExports()
 
@@ -111,9 +110,6 @@ May throw if files cannot be written to disk
 
 ```typescript
 const analyzer = new BarrelAnalyzer('/project');
-const analysis = await analyzer.analyzeBarrelImpact(
-  '/old/file.ts',
-  '/new/file.ts',
-);
+const analysis = await analyzer.analyzeBarrelImpact('/old/file.ts', '/new/file.ts');
 await analyzer.updateBarrelExports(analysis.affectedBarrels, '/new/file.ts');
 ```

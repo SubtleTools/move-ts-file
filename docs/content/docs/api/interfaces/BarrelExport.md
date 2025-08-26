@@ -19,7 +19,7 @@ Defined in: [types.ts:88](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 The full text of the export declaration
 
----
+***
 
 ### exportDeclarationNode
 
@@ -29,7 +29,7 @@ Defined in: [types.ts:98](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Reference to the ts-morph ExportDeclaration node for updating
 
----
+***
 
 ### filePath
 
@@ -39,7 +39,7 @@ Defined in: [types.ts:86](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Absolute path to the barrel file containing the re-export
 
----
+***
 
 ### hasStarExport
 
@@ -49,7 +49,7 @@ Defined in: [types.ts:96](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Whether this is a star export (export *)
 
----
+***
 
 ### moduleSpecifier
 
@@ -59,7 +59,7 @@ Defined in: [types.ts:90](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 The module specifier being re-exported from
 
----
+***
 
 ### namedExports
 
@@ -69,7 +69,7 @@ Defined in: [types.ts:94](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Named exports (if any)
 
----
+***
 
 ### resolvedPath
 

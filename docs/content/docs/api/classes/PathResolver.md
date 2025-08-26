@@ -64,7 +64,7 @@ The new absolute path of the moved file
 
 New import specifier, or null if cannot be calculated
 
----
+***
 
 ### getImportType()
 
@@ -94,7 +94,7 @@ Absolute path of the file containing the import
 
 Import type information, or null if not handled by this resolver
 
----
+***
 
 ### resolveImportPath()
 

@@ -10,7 +10,7 @@ Defined in: [tsconfig-path-resolver.ts:13](https://github.com/SubtleTools/move-t
 Resolves TypeScript config path mappings
 
 Handles imports that use TypeScript path mappings defined in tsconfig.json,
-such as '@/components/_' mapping to './src/components/_'. Resolves these
+such as '@/components/*' mapping to './src/components/*'. Resolves these
 mapped imports to actual file paths and calculates new mappings when files move.
 
 ## Extends
@@ -83,7 +83,7 @@ New path mapping specifier, or null if path doesn't fit any mapping
 
 [`PathResolver`](/api/classes/pathresolver/).[`calculateNewImportPath`](/api/classes/pathresolver/#calculatenewimportpath)
 
----
+***
 
 ### getImportType()
 
@@ -117,7 +117,7 @@ Import type information if it's a tsconfig path, or null otherwise
 
 [`PathResolver`](/api/classes/pathresolver/).[`getImportType`](/api/classes/pathresolver/#getimporttype)
 
----
+***
 
 ### resolveImportPath()
 

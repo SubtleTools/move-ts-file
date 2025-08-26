@@ -20,7 +20,7 @@ Defined in: [types.ts:15](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 End position of the import specifier in the source file
 
----
+***
 
 ### isExport
 
@@ -30,7 +30,7 @@ Defined in: [types.ts:17](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Whether this is an export re-export statement
 
----
+***
 
 ### newPath?
 
@@ -40,7 +40,7 @@ Defined in: [types.ts:19](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 New file path after moving (used during update calculation)
 
----
+***
 
 ### specifier
 
@@ -50,7 +50,7 @@ Defined in: [types.ts:11](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 The import specifier string (e.g., './file', '@/components/Button')
 
----
+***
 
 ### start
 

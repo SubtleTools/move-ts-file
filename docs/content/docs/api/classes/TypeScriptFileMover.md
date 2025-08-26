@@ -57,7 +57,7 @@ and package.json files in the project to understand path mappings and import con
 
 If configuration files cannot be parsed
 
----
+***
 
 ### moveFile()
 
@@ -68,7 +68,6 @@ Defined in: [move-ts.ts:161](https://github.com/SubtleTools/move-ts-file/blob/ma
 Moves a TypeScript file and automatically updates all import paths throughout the project.
 
 This is the main method that orchestrates the entire file moving process:
-
 1. Validates the source file exists and is a TypeScript file
 2. Finds all files in the project that import the source file
 3. Moves the source file to the destination

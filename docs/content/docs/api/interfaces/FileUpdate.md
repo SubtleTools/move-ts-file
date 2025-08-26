@@ -20,7 +20,7 @@ Defined in: [types.ts:30](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Current content of the file
 
----
+***
 
 ### filePath
 
@@ -30,7 +30,7 @@ Defined in: [types.ts:28](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Absolute path to the file that needs updating
 
----
+***
 
 ### references
 

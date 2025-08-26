@@ -19,7 +19,7 @@ Defined in: [types.ts:78](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 The alias if the export is aliased (e.g., 'as NewName')
 
----
+***
 
 ### name
 

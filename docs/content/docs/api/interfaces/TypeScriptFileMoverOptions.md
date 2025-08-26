@@ -39,7 +39,7 @@ Defined in: [move-ts.ts:53](https://github.com/SubtleTools/move-ts-file/blob/mai
 
 If true, enable debug logging for troubleshooting (default: false)
 
----
+***
 
 ### dryRun?
 
@@ -49,7 +49,7 @@ Defined in: [move-ts.ts:51](https://github.com/SubtleTools/move-ts-file/blob/mai
 
 If true, show what would be changed without making changes (default: false)
 
----
+***
 
 ### updateBarrels?
 

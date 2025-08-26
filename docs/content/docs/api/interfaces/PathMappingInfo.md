@@ -20,7 +20,7 @@ Defined in: [types.ts:41](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 The original alias pattern from tsconfig.json (e.g., '@/components/*')
 
----
+***
 
 ### aliasPattern
 
@@ -30,7 +30,7 @@ Defined in: [types.ts:43](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 The alias pattern without wildcards (e.g., '@/components/')
 
----
+***
 
 ### basePath
 
@@ -40,7 +40,7 @@ Defined in: [types.ts:47](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Absolute base path for resolving relative paths
 
----
+***
 
 ### pathPattern
 

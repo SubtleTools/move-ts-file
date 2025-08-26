@@ -20,7 +20,7 @@ Defined in: [types.ts:56](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Map of import patterns to their resolved paths
 
----
+***
 
 ### packageRoot
 

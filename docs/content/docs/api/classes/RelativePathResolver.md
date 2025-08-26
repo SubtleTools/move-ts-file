@@ -69,7 +69,7 @@ New relative import specifier
 
 [`PathResolver`](/api/classes/pathresolver/).[`calculateNewImportPath`](/api/classes/pathresolver/#calculatenewimportpath)
 
----
+***
 
 ### getImportType()
 
@@ -103,7 +103,7 @@ Import type information if relative, or null otherwise
 
 [`PathResolver`](/api/classes/pathresolver/).[`getImportType`](/api/classes/pathresolver/#getimporttype)
 
----
+***
 
 ### resolveImportPath()
 

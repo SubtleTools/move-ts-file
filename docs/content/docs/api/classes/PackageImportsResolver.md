@@ -83,7 +83,7 @@ New package import specifier, or null if doesn't fit pattern
 
 [`PathResolver`](/api/classes/pathresolver/).[`calculateNewImportPath`](/api/classes/pathresolver/#calculatenewimportpath)
 
----
+***
 
 ### getImportType()
 
@@ -117,7 +117,7 @@ Import type information if it's a package import, or null otherwise
 
 [`PathResolver`](/api/classes/pathresolver/).[`getImportType`](/api/classes/pathresolver/#getimporttype)
 
----
+***
 
 ### resolveImportPath()
 

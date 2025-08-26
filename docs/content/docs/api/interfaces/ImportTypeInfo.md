@@ -17,7 +17,7 @@ Result of analyzing an import specifier to determine its type and context
 
 Defined in: [types.ts:67](https://github.com/SubtleTools/move-ts-file/blob/main/src/types.ts#L67)
 
----
+***
 
 ### packageName?
 
@@ -25,7 +25,7 @@ Defined in: [types.ts:67](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Defined in: [types.ts:68](https://github.com/SubtleTools/move-ts-file/blob/main/src/types.ts#L68)
 
----
+***
 
 ### pathInfo?
 
@@ -33,7 +33,7 @@ Defined in: [types.ts:68](https://github.com/SubtleTools/move-ts-file/blob/main/
 
 Defined in: [types.ts:66](https://github.com/SubtleTools/move-ts-file/blob/main/src/types.ts#L66)
 
----
+***
 
 ### type
 

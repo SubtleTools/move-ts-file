@@ -19,7 +19,7 @@ Defined in: [types.ts:106](https://github.com/SubtleTools/move-ts-file/blob/main
 
 Barrel exports that directly re-export from the moved file
 
----
+***
 
 ### shouldUpdateBarrels
 
@@ -29,7 +29,7 @@ Defined in: [types.ts:110](https://github.com/SubtleTools/move-ts-file/blob/main
 
 Whether barrel exports need to be updated
 
----
+***
 
 ### transitiveImports
 

@@ -62,7 +62,7 @@ const analyzer = new ImportAnalyzer();
 const imports = await analyzer.analyzeFile('/project/src/component.ts');
 ```
 
----
+***
 
 ### createSourceFile()
 
@@ -99,14 +99,11 @@ TypeScript source file object ready for AST analysis
 
 ```typescript
 const analyzer = new ImportAnalyzer();
-const sourceFile = analyzer.createSourceFile(
-  'test.ts',
-  'import { x } from "./y";',
-);
+const sourceFile = analyzer.createSourceFile('test.ts', 'import { x } from "./y";');
 const imports = analyzer.extractImports(sourceFile);
 ```
 
----
+***
 
 ### extractImports()
 
@@ -138,11 +135,7 @@ Array of import references with their specifiers and positions
 
 ```typescript
 const analyzer = new ImportAnalyzer();
-const sourceFile = ts.createSourceFile(
-  'test.ts',
-  content,
-  ts.ScriptTarget.Latest,
-);
+const sourceFile = ts.createSourceFile('test.ts', content, ts.ScriptTarget.Latest);
 const imports = analyzer.extractImports(sourceFile);
 // imports[0] might be { specifier: './utils', start: 15, end: 23, isExport: false }
 ```
