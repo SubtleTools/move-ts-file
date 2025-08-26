@@ -48,10 +48,11 @@ jobs:
           
       - name: Test CLI with Node.js
         run: |
-          mkdir -p test-cli/src
-          echo 'export const test = "hello";' > test-cli/src/test.ts
-          echo 'import { test } from "./test";' > test-cli/src/main.ts
-          cd test-cli
+          TEST_DIR="test-cli-node-$$"
+          mkdir -p "$TEST_DIR/src"
+          echo 'export const test = "hello";' > "$TEST_DIR/src/test.ts"
+          echo 'import { test } from "./test";' > "$TEST_DIR/src/main.ts"
+          cd "$TEST_DIR"
           node ../bin/move-ts-file.js src/test.ts src/utils/test.ts
           # Verify the import was updated
           if ! grep -q 'from "./utils/test"' src/main.ts; then
@@ -59,14 +60,15 @@ jobs:
             exit 1
           fi
           cd ..
-          rm -rf test-cli
+          rm -rf "$TEST_DIR"
           
       - name: Test CLI with Bun
         run: |
-          mkdir -p test-cli/src
-          echo 'export const test = "hello";' > test-cli/src/test.ts
-          echo 'import { test } from "./test";' > test-cli/src/main.ts
-          cd test-cli
+          TEST_DIR="test-cli-bun-$$"
+          mkdir -p "$TEST_DIR/src"
+          echo 'export const test = "hello";' > "$TEST_DIR/src/test.ts"
+          echo 'import { test } from "./test";' > "$TEST_DIR/src/main.ts"
+          cd "$TEST_DIR"
           bun ../bin/move-ts-file.js src/test.ts src/lib/test.ts
           # Verify the import was updated
           if ! grep -q 'from "./lib/test"' src/main.ts; then
@@ -74,4 +76,4 @@ jobs:
             exit 1
           fi
           cd ..
-          rm -rf test-cli
+          rm -rf "$TEST_DIR"
