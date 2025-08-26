@@ -1,0 +1,239 @@
+---
+title: CLI Reference
+description: Complete command-line interface reference for move-ts-file
+---
+
+## CLI Reference
+
+Complete reference for the `move-ts-file` command-line interface.
+
+## Basic Syntax
+
+```bash
+move-ts-file <source> <destination> [options]
+```
+
+## Arguments
+
+### `<source>`
+**Required** - The TypeScript file to move.
+
+- Must be a `.ts` or `.tsx` file
+- Can be an absolute or relative path
+- File must exist and be readable
+
+**Examples:**
+```bash
+move-ts-file src/components/Button.tsx
+move-ts-file ./utils/helper.ts
+move-ts-file /absolute/path/to/file.ts
+```
+
+### `<destination>`
+**Required** - Where to move the file.
+
+**File destination:**
+```bash
+move-ts-file src/old.ts src/new.ts
+```
+
+**Directory destination:**
+```bash
+move-ts-file src/old.ts src/components/
+# Results in: src/components/old.ts
+```
+
+**Move and rename:**
+```bash
+move-ts-file src/helper.ts lib/string-utils.ts
+```
+
+## Options
+
+### `--help`, `-h`
+Show help information and exit.
+
+```bash
+move-ts-file --help
+move-ts-file -h
+```
+
+### `--version`, `-v`
+Show version number and exit.
+
+```bash
+move-ts-file --version
+move-ts-file -v
+```
+
+### `--debug`
+Enable debug output showing detailed information about the move process.
+
+```bash
+move-ts-file --debug src/old.ts src/new.ts
+```
+
+**Debug output includes:**
+- Files being scanned for imports
+- Import statements found and analyzed  
+- Path resolution strategies used
+- Barrel files detected and updated
+- Summary of all changes made
+
+### `--dry-run`
+Preview what would happen without making any changes.
+
+```bash
+move-ts-file --dry-run src/old.ts src/new.ts
+```
+
+**Shows:**
+- Which files would be moved
+- What import updates would be made
+- Which barrel exports would be updated
+- No actual file system changes
+
+### `--no-update-barrels`
+Disable automatic barrel export updates.
+
+```bash
+move-ts-file --no-update-barrels src/old.ts src/new.ts
+```
+
+By default, the tool automatically updates barrel files (`index.ts`) that re-export the moved file. This flag disables that behavior.
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success - file moved and imports updated |
+| `1` | Error - invalid arguments, file not found, or other error |
+| `2` | Parse error - TypeScript syntax errors in source files |
+
+## Examples
+
+### Basic Move
+```bash
+move-ts-file src/components/Button.tsx src/ui/Button.tsx
+```
+
+### Move to Directory
+```bash
+move-ts-file src/utils/helper.ts shared/
+```
+
+### Move and Rename
+```bash
+move-ts-file utils/string.ts lib/string-utilities.ts
+```
+
+### Debug a Move
+```bash
+move-ts-file --debug src/components/Card.tsx src/ui/Card.tsx
+```
+
+### Preview Changes
+```bash
+move-ts-file --dry-run src/old-name.ts src/new-name.ts
+```
+
+### Disable Barrel Updates
+```bash
+move-ts-file --no-update-barrels src/utils/helper.ts src/lib/helper.ts
+```
+
+### Package Manager Usage
+
+#### npm/npx
+```bash
+# Global installation
+npm install -g move-ts-file
+move-ts-file src/old.ts src/new.ts
+
+# One-time use
+npx move-ts-file src/old.ts src/new.ts
+```
+
+#### Yarn
+```bash
+# Global installation  
+yarn global add move-ts-file
+move-ts-file src/old.ts src/new.ts
+
+# One-time use
+yarn dlx move-ts-file src/old.ts src/new.ts
+```
+
+#### pnpm
+```bash
+# Global installation
+pnpm add -g move-ts-file
+move-ts-file src/old.ts src/new.ts
+
+# One-time use
+pnpm dlx move-ts-file src/old.ts src/new.ts
+```
+
+#### Bun
+```bash
+# Global installation
+bun add -g move-ts-file  
+move-ts-file src/old.ts src/new.ts
+
+# One-time use
+bunx move-ts-file src/old.ts src/new.ts
+```
+
+## Configuration Files
+
+move-ts-file automatically reads configuration from:
+
+### TypeScript Configuration
+- `tsconfig.json` - For path mappings and compiler options
+- Located in current directory or parent directories
+- Used for resolving TypeScript path aliases
+
+### Package Configuration  
+- `package.json` - For Node.js package imports
+- Used for `#`-prefixed import resolution
+- Supports workspace configurations in monorepos
+
+### No Tool-Specific Configuration
+The tool requires no additional configuration files - it works with your existing TypeScript and Node.js project setup.
+
+## Environment Variables
+
+Currently, move-ts-file does not use any environment variables. All configuration is done through command-line options and existing project files.
+
+## Integration
+
+### CI/CD Usage
+```bash
+# In GitHub Actions, CI, etc.
+npx move-ts-file src/old.ts src/new.ts
+if [ $? -eq 0 ]; then
+  echo "File moved successfully"
+else
+  echo "Move failed"
+  exit 1
+fi
+```
+
+### Scripts in package.json
+```json
+{
+  "scripts": {
+    "move-file": "move-ts-file",
+    "move-debug": "move-ts-file --debug",
+    "move-preview": "move-ts-file --dry-run"
+  }
+}
+```
+
+### Shell Aliases
+```bash
+# Add to your shell profile
+alias mvts="move-ts-file"
+alias mvts-debug="move-ts-file --debug"
+alias mvts-dry="move-ts-file --dry-run"
+```

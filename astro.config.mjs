@@ -37,17 +37,80 @@ export default defineConfig({
             link: '/introduction/',
             icon: 'document',
             items: [
-              { label: 'Getting Started', items: ['introduction', 'installation', 'quick-start'] },
-              { label: 'Features', items: ['features/import-styles', 'features/barrel-exports'] },
-              { label: 'AI Integration', items: ['claude/refactoring'] },
+              {
+                label: 'Getting Started',
+                items: [
+                  { label: 'Introduction', link: '/introduction/' },
+                  { label: 'Installation', link: '/installation/' },
+                  { label: 'Quick Start', link: '/quick-start/' }
+                ]
+              },
+              {
+                label: 'Features',
+                items: [
+                  { label: 'Import Styles', link: '/features/import-styles/' },
+                  { label: 'Barrel Exports', link: '/features/barrel-exports/' }
+                ]
+              },
+              {
+                label: 'AI Integration',
+                items: [
+                  { label: 'Claude Code Refactoring', link: '/claude/refactoring/' },
+                  { label: 'llms.txt', link: '/llms.txt' }
+                ]
+              },
+              {
+                label: 'Reference',
+                items: [
+                  { label: 'CLI Reference', link: '/cli-reference/' },
+                  { label: 'Troubleshooting', link: '/troubleshooting/' }
+                ]
+              },
             ],
           },
           {
             label: 'API Reference',
-            link: '/api/',
+            link: '/api/readme/',
             icon: 'seti:config',
             items: [
-              { label: 'API Documentation', autogenerate: { directory: 'api' } },
+              { label: 'API Overview', link: '/api/readme/' },
+              {
+                label: 'Core Classes',
+                items: [
+                  { label: 'TypeScriptFileMover', link: '/api/classes/typescriptfilemover/' },
+                  { label: 'BarrelAnalyzer', link: '/api/classes/barrelanalyzer/' },
+                  { label: 'ImportAnalyzer', link: '/api/classes/importanalyzer/' }
+                ]
+              },
+              {
+                label: 'Path Resolvers',
+                items: [
+                  { label: 'PathResolver', link: '/api/classes/pathresolver/' },
+                  { label: 'TsConfigPathResolver', link: '/api/classes/tsconfigpathresolver/' },
+                  { label: 'RelativePathResolver', link: '/api/classes/relativepathresolver/' },
+                  { label: 'PackageImportsResolver', link: '/api/classes/packageimportsresolver/' }
+                ]
+              },
+              {
+                label: 'Configuration',
+                items: [
+                  { label: 'ConfigLoader', link: '/api/classes/configloader/' }
+                ]
+              },
+              {
+                label: 'Interfaces',
+                items: [
+                  { label: 'TypeScriptFileMoverOptions', link: '/api/interfaces/typescriptfilemoveroptions/' },
+                  { label: 'ImportReference', link: '/api/interfaces/importreference/' },
+                  { label: 'BarrelAnalysisResult', link: '/api/interfaces/barrelanalysisresult/' },
+                  { label: 'FileUpdate', link: '/api/interfaces/fileupdate/' },
+                  { label: 'BarrelExport', link: '/api/interfaces/barrelexport/' },
+                  { label: 'ImportTypeInfo', link: '/api/interfaces/importtypeinfo/' },
+                  { label: 'NamedExport', link: '/api/interfaces/namedexport/' },
+                  { label: 'PackageImportsInfo', link: '/api/interfaces/packageimportsinfo/' },
+                  { label: 'PathMappingInfo', link: '/api/interfaces/pathmappinginfo/' }
+                ]
+              }
             ],
           },
         ]),
@@ -65,6 +128,9 @@ export default defineConfig({
       ],
       title: 'move-ts-file',
       description: 'Intelligent CLI tool to move TypeScript files and automatically update all import paths throughout your project',
+      expressiveCode: {
+        themes: ['tokyo-night'],
+      },
       social: [
         {
           icon: 'github',

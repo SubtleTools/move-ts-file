@@ -14,163 +14,284 @@ hero:
       icon: external
 ---
 
-## What makes move-ts-file special?
+import { CardGrid, Card } from '@astrojs/starlight/components';
+import { Steps } from '@astrojs/starlight/components';
 
-### 🎯 Import Style Preservation
-Maintains your existing import patterns instead of forcing you to adopt a specific style. Whether you use relative imports, path mappings, or workspace imports, move-ts-file preserves your choices.
-
-### 📦 Monorepo Native
-Built from the ground up to handle complex monorepo structures with workspace dependencies, cross-package imports, and scoped packages.
-
-### 🤖 AI-Assisted Development
-Designed specifically for AI agents and modern development workflows. Includes comprehensive Claude Code integration with custom commands.
-
-### 🔄 Barrel Export Management
-Automatically detects and updates barrel files (index.ts re-exports) when files are moved, ensuring your module structure stays intact.
-
-### ⚡ Zero Configuration
+<CardGrid>
+<Card title="⚡ Zero Configuration" icon="approve-check">
 Works out of the box with any TypeScript project. No complex configuration files or setup required.
+</Card>
 
-### 🧪 Battle-Tested
+<Card title="🎯 Import Style Preservation" icon="star">
+Maintains your existing import patterns instead of forcing you to adopt a specific style. Whether you use relative imports, path mappings, or workspace imports, move-ts-file preserves your choices.
+</Card>
+
+<Card title="🔄 Barrel Export Management" icon="setting">
+Automatically detects and updates barrel files (index.ts re-exports) when files are moved, ensuring your module structure stays intact.
+</Card>
+
+<Card title="📦 Complex Project Support" icon="puzzle">
+Handles sophisticated project structures including monorepos, workspace dependencies, cross-package imports, and nested path mappings.
+</Card>
+
+<Card title="🧪 Battle-Tested" icon="open-book">
 Comprehensive test suite with 47+ tests covering edge cases, monorepo scenarios, and complex import patterns.
+</Card>
 
-## It even updates barrel row indexes!
+<Card title="🤖 AI-Ready" icon="rocket">
+Integrates seamlessly with AI coding assistants like Claude Code, enabling confident automated refactoring workflows.
+</Card>
+</CardGrid>
+
+## It even updates barrel exports!
 
 When you move files that are re-exported by barrel files, move-ts-file intelligently updates the entire dependency tree to maintain clean import paths.
 
-```bash
-# Move a utility file that's re-exported by a barrel
-npx move-ts-file src/utils/validation.ts src/shared/validation.ts
+<Steps>
+
+1. Imagine you have this code hierarchy
+
+    ```d2
+    direction: down
+
+    vars: {
+      d2-config: {
+        theme-id: 201
+        theme-overrides: {
+          N2: "#FFF"
+        }
+      }
+    }
+
+    classes: {
+      base: {
+        style: {
+          stroke: white
+          border-radius: 8
+          font: mono
+          font-size: 30
+          bold: false
+          fill: "#111"
+          shadow: true
+          stroke: "#111"
+        }
+      }
+
+      file: {
+        shape: rectangle
+        style: {
+          fill: "#CCDDFF"
+          font-color: "#237"
+        }
+      }
+
+      barrel_utils: {
+        shape: rectangle
+        style: {
+          fill: "#FFE5CC"
+          font-color: "#842"
+        }
+      }
+
+      barrel_shared: {
+        shape: rectangle
+        style: {
+          fill: "#E5CCFF"
+          font-color: "#624"
+        }
+      }
+
+      validation: {
+        shape: rectangle
+        style: {
+          fill: "#CCFFCC"
+          font-color: "#264"
+        }
+      }
+    }
+
+    shared: shared/index.ts {
+      near: center-right
+      shape: sql_table
+      class: [base; barrel_shared]
+      "": "export { createLogger } from './logger';"
+    }
+
+    UserForm: components/UserForm.tsx {
+      shape: sql_table
+      class: [base; file]
+      "": "import { validateEmail } from '#src/utils';"
+    }
+
+    auth: services/auth.ts {
+      shape: sql_table
+      class: [base; file]
+      "": "import { validateEmail } from '../utils';"
+    }
+
+    utils: utils/index.ts {
+      shape: sql_table
+      class: [base; barrel_utils]
+      "": "export { validateEmail } from './validation';"
+    }
+
+    validation: utils/validation.ts {
+      shape: sql_table
+      class: [base; validation]
+      "": "export function validateEmail(email: string) { ... }"
+    }
+
+    UserForm -> utils
+    auth -> utils
+    utils -> validation
+    ```
+
+2. When you move `validation.ts` from `utils/` to `shared/`
+
+   ```bash
+   bunx move-ts-file src/utils/validation.ts src/shared/validation.ts
+   ```
+
+3. This is what your code will look like
+
+    ```d2
+    direction: down
+
+    vars: {
+      d2-config: {
+        theme-id: 201
+        theme-overrides: {
+          N2: "#FFF"
+        }
+      }
+    }
+
+    classes: {
+      base: {
+        style: {
+          stroke: white
+          border-radius: 8
+          font: mono
+          font-size: 30
+          bold: false
+          fill: "#111"
+          shadow: true
+          stroke: "#111"
+        }
+      }
+
+      file: {
+        shape: rectangle
+        style: {
+          fill: "#CCDDFF"
+          font-color: "#237"
+        }
+      }
+
+      barrel_utils: {
+        shape: rectangle
+        style: {
+          fill: "#FFE5CC"
+          font-color: "#842"
+        }
+      }
+
+      barrel_shared: {
+        shape: rectangle
+        style: {
+          fill: "#E5CCFF"
+          font-color: "#624"
+        }
+      }
+
+      validation: {
+        shape: rectangle
+        style: {
+          fill: "#CCFFCC"
+          font-color: "#264"
+        }
+      }
+    }
+
+    UserForm: components/UserForm.tsx {
+      shape: sql_table
+      class: [base; file]
+      "": "import { validateEmail } from '#src/shared';"
+    }
+
+    auth: services/auth.ts {
+      shape: sql_table
+      class: [base; file]
+      "": "import { validateEmail } from '../shared';"
+    }
+
+    utils: utils/index.ts {
+      near: center-left
+      shape: sql_table
+      class: [base; barrel_utils]
+      "": "// validateEmail export removed"
+    }
+
+    shared: shared/index.ts {
+      shape: sql_table
+      class: [base; barrel_shared]
+      "": "export { validateEmail } from './validation';"
+    }
+
+    validation: shared/validation.ts {
+      shape: sql_table
+      class: [base; validation]
+      "": "export function validateEmail(email: string) { ... }"
+    }
+
+    UserForm -> shared
+    auth -> shared
+    shared -> validation
+    ```
+
+</Steps>
+
+
+## Code Changes
+
+```typescript title="src/utils/index.ts" del={3}
+export { Button } from './components/Button.js';
+export { Modal } from './components/Modal.js';
+export { validateEmail } from './validation.js';
+export { formatDate } from './date.js';
 ```
 
-### Before: Original Dependency Tree
-
-```d2
-direction: right
-
-src/components/UserForm.tsx -> src/utils/index.ts: "import { validateEmail }"
-src/services/auth.ts -> src/utils/index.ts: "import { validateEmail }"
-src/utils/index.ts -> src/utils/validation.ts: "export { validateEmail }"
-
-src/utils/validation.ts: {
-  shape: rectangle
-  style: {
-    fill: "#fef3c7"
-    stroke: "#f59e0b"
-  }
-}
-
-src/utils/index.ts: {
-  shape: rectangle
-  style: {
-    fill: "#dbeafe"
-    stroke: "#3b82f6"
-  }
-}
-
-src/components/UserForm.tsx: {
-  shape: rectangle
-  style: {
-    fill: "#f3e8ff"
-    stroke: "#8b5cf6"
-  }
-}
-
-src/services/auth.ts: {
-  shape: rectangle
-  style: {
-    fill: "#f3e8ff"
-    stroke: "#8b5cf6"
-  }
-}
+```typescript title="src/shared/index.ts" ins={2}
+export { createLogger } from './logger.js';
+export { validateEmail } from './validation.js';
 ```
 
-### After: Updated Dependency Tree
-
-```d2
-direction: right
-
-src/components/UserForm.tsx -> src/utils/index.ts: "import { validateEmail }"
-src/services/auth.ts -> src/utils/index.ts: "import { validateEmail }"
-src/utils/index.ts -> src/shared/validation.ts: "export { validateEmail }"
-
-src/shared/validation.ts: {
-  shape: rectangle
-  style: {
-    fill: "#dcfce7"
-    stroke: "#22c55e"
-  }
-}
-
-src/utils/index.ts: {
-  shape: rectangle
-  style: {
-    fill: "#dbeafe"
-    stroke: "#3b82f6"
-  }
-}
-
-src/components/UserForm.tsx: {
-  shape: rectangle
-  style: {
-    fill: "#f3e8ff"
-    stroke: "#8b5cf6"
-  }
-}
-
-src/services/auth.ts: {
-  shape: rectangle
-  style: {
-    fill: "#f3e8ff"
-    stroke: "#8b5cf6"
-  }
-}
-
-moved_file: {
-  shape: text
-  style: {
-    font-color: "#22c55e"
-    font-size: 12
-    bold: true
-  }
-}
-moved_file: "✅ Moved to src/shared/validation.ts!"
+```typescript title="src/components/UserForm.tsx" del={3} ins={4}
+import { Button } from '#src/components';
+import { formatDate } from '#src/utils';
+import { validateEmail } from '#src/utils';
+import { validateEmail } from '#src/shared';
 ```
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+```typescript title="src/services/auth.ts" del={2} ins={3}
+import { ApiClient } from './api-client.js';
+import { validateEmail } from '../utils';
+import { validateEmail } from '../shared';
+import { hashPassword } from './crypto.js';
+```
 
-<Tabs>
-<TabItem label="What Happens">
+## What Happens
 
 1. **File moved**: `src/utils/validation.ts` → `src/shared/validation.ts`
-2. **Barrel updated**: The barrel file `src/utils/index.ts` now points to the new location
-3. **Consumer files unchanged**: Files importing from the barrel continue to work without modification
-4. **Zero breaking changes**: Your public API remains stable
-
-</TabItem>
-<TabItem label="Code Changes">
-
-**src/utils/index.ts** *(automatically updated)*
-```typescript
-// Before
-export { validateEmail } from './validation.js';
-
-// After  
-export { validateEmail } from '../shared/validation.js'; // ✅ Updated path
-```
-
-**src/components/UserForm.tsx** *(no changes needed)*
-```typescript
-import { validateEmail } from '../utils'; // ✅ Still works!
-```
-
-</TabItem>
-</Tabs>
+2. **Export removed from utils**: The export is removed from `src/utils/index.ts`
+3. **New barrel created**: A new barrel file `src/shared/index.ts` is created
+4. **Imports updated**: Consumer files are updated to import from the new location
+5. **Import styles preserved**: Each file maintains its original import style
 
 **Why This Matters:**
 - 🎯 **Stable APIs**: Internal refactoring doesn't break your public interfaces
 - 🚀 **Confident Refactoring**: Move files without fear of breaking imports
-- 🤖 **Perfect for AI**: Let AI assistants refactor while maintaining code integrity  
+- 🤖 **Perfect for AI**: Let AI assistants refactor while maintaining code integrity
 - ⚡ **Zero Downtime**: No need to update dozens of import statements across your codebase
 
 Ready to get started? [Install move-ts-file](/installation/) and begin moving files with confidence.

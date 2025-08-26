@@ -1,0 +1,207 @@
+---
+title: Troubleshooting
+description: Common issues and solutions when using move-ts-file
+---
+
+## Troubleshooting
+
+This guide covers common issues you might encounter when using move-ts-file and how to resolve them.
+
+## Common Issues
+
+### "No such file or directory" Error
+
+**Problem:** The tool reports that the source file doesn't exist.
+
+```bash
+Error: Source file 'src/components/Button.ts' not found
+```
+
+**Solutions:**
+1. Check the file path is correct (case-sensitive on Unix systems)
+2. Ensure you're running the command from the project root
+3. Verify the file has a `.ts` or `.tsx` extension
+
+### TypeScript Parse Errors
+
+**Problem:** The tool can't parse your TypeScript files.
+
+```bash
+Error: Failed to parse TypeScript file: Unexpected token
+```
+
+**Solutions:**
+1. Ensure your TypeScript syntax is valid
+2. Check that all imports/exports are properly formatted
+3. Run `tsc --noEmit` to verify TypeScript compilation
+4. Make sure you're not trying to move non-TypeScript files
+
+### Import Updates Not Working
+
+**Problem:** Files are moved but imports aren't updated correctly.
+
+**Common Causes:**
+- **Dynamic imports**: `import()` calls with variables aren't updated
+- **Comment-based imports**: Imports in comments aren't processed
+- **String imports**: Import paths in strings aren't detected
+
+**Solutions:**
+1. Use static import statements: `import { foo } from './bar'`
+2. Avoid variable-based import paths
+3. Check the debug output with `--debug` flag
+
+### Barrel Export Issues
+
+**Problem:** Barrel exports aren't updated after moving files.
+
+**Solutions:**
+1. Check that your barrel files follow standard patterns:
+   ```typescript
+   // ✅ Supported
+   export { Component } from './Component';
+   export * from './types';
+   
+   // ❌ Not supported
+   const comp = await import('./Component');
+   export { comp };
+   ```
+2. Use `--debug` to see which barrel files were detected
+3. Ensure barrel files are named `index.ts` or `index.tsx`
+
+### Path Mapping Problems
+
+**Problem:** tsconfig.json path mappings aren't preserved.
+
+**Solutions:**
+1. Verify your `tsconfig.json` is valid:
+   ```json
+   {
+     "compilerOptions": {
+       "baseUrl": ".",
+       "paths": {
+         "@/*": ["./src/*"],
+         "@components/*": ["./src/components/*"]
+       }
+     }
+   }
+   ```
+2. Make sure the moved file's new location matches a path mapping
+3. Check that the `tsconfig.json` is in your project root or parent directory
+
+### Package Import Issues
+
+**Problem:** Node.js package imports (with `#` prefix) aren't working.
+
+**Solutions:**
+1. Verify your `package.json` imports field:
+   ```json
+   {
+     "imports": {
+       "#internal/*": "./src/internal/*",
+       "#shared/*": "./src/shared/*"
+     }
+   }
+   ```
+2. Ensure you're using Node.js 14+ which supports package imports
+3. Check that the import paths match your package.json patterns
+
+## Debugging Commands
+
+### Enable Debug Mode
+
+Get detailed information about what the tool is doing:
+
+```bash
+move-ts-file --debug src/old.ts src/new.ts
+```
+
+This shows:
+- Which files were found and parsed
+- What import statements were detected
+- Which path resolution strategy was used
+- What updates were made
+
+### Dry Run Mode
+
+See what would happen without making changes:
+
+```bash
+move-ts-file --dry-run src/old.ts src/new.ts
+```
+
+### Check Version
+
+Verify you're using the latest version:
+
+```bash
+move-ts-file --version
+```
+
+## Performance Issues
+
+### Large Codebases
+
+For projects with thousands of files:
+
+1. **Use specific paths**: Instead of scanning the entire project, the tool only scans files that might import the moved file
+2. **Exclude node_modules**: The tool automatically ignores node_modules and common ignore patterns
+3. **Consider file count**: Very large monorepos (10,000+ files) may take longer
+
+### Memory Usage
+
+If you encounter out-of-memory errors:
+
+1. Close other applications to free up RAM
+2. Use Node.js with increased memory: `node --max-old-space-size=8192`
+3. Consider breaking large moves into smaller batches
+
+## Getting Help
+
+If you're still having issues:
+
+1. **Check existing issues**: Visit [GitHub Issues](https://github.com/SubtleTools/move-ts-file/issues)
+2. **Create a minimal reproduction**: Prepare a small example that demonstrates the problem
+3. **Include debug output**: Run with `--debug` and include the output
+4. **Provide environment info**: Node.js version, operating system, project structure
+
+## Limitations
+
+### What move-ts-file Cannot Do
+
+- **Move non-TypeScript files**: Only `.ts` and `.tsx` files are supported
+- **Update dynamic imports**: Variable-based import paths aren't updated
+- **Process template strings**: Import paths in template literals aren't detected
+- **Handle circular dependencies**: May not work correctly with circular import patterns
+- **Update external packages**: Cannot update imports in node_modules
+
+### Unsupported Import Patterns
+
+```typescript
+// ❌ Dynamic imports with variables
+const moduleName = 'Button';
+const Component = await import(`./components/${moduleName}`);
+
+// ❌ Template literal imports
+const path = './components';
+import { Button } from `${path}/Button`;
+
+// ❌ Conditional imports
+const Component = isDev 
+  ? await import('./dev/Component')
+  : await import('./prod/Component');
+```
+
+### Working Patterns
+
+```typescript
+// ✅ Static imports
+import { Button } from './components/Button';
+import * as utils from '../utils';
+
+// ✅ Dynamic imports with static paths
+const Component = await import('./components/Button');
+
+// ✅ Standard re-exports
+export { Button } from './components/Button';
+export * from './types';
+```
