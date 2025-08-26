@@ -4,11 +4,11 @@ bun.lockb
 
 # Build outputs
 dist/
-bin/
 *.js
 *.d.ts
 
-# Exclude source files from ignore
+# Allow bin directory and test JS files
+!bin/
 !test/**/*.js
 
 # Test artifacts
