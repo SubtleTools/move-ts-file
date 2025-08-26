@@ -172,6 +172,7 @@ export const formatUserDisplayName = (user: User): string => {
 
     // Add usage in web app
     const webUtilsFile = join(tempFixturePath, 'apps/web/src/utils/display.ts');
+    await mkdir(dirname(webUtilsFile), { recursive: true });
     await writeFile(
       webUtilsFile,
       `
