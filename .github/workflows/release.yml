@@ -23,10 +23,10 @@ jobs:
           bun-version: latest
           
       - name: Install dependencies
-        run: bun install
+        run: npm ci
         
       - name: Run full test suite
-        run: bun run prepack
+        run: npm run prepack
 
   release:
     needs: test
@@ -51,10 +51,10 @@ jobs:
           bun-version: latest
           
       - name: Install dependencies
-        run: bun install
+        run: npm ci
         
       - name: Build for release
-        run: bun run build
+        run: npm run build
         
       - name: Extract version from tag
         id: version
@@ -62,8 +62,7 @@ jobs:
         
       - name: Update package.json version
         run: |
-          bun install
-          bun pm pack --dry-run > /dev/null  # Validate package.json
+          npm pack --dry-run > /dev/null  # Validate package.json
           # Manually update version since bun doesn't have npm version equivalent
           node -e "
             const fs = require('fs');
