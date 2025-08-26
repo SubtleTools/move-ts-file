@@ -40,6 +40,7 @@ jobs:
     permissions:
       contents: write
       id-token: write
+      actions: write
       
     steps:
       - name: Checkout code
@@ -123,6 +124,14 @@ jobs:
           npm whoami
           echo "Publishing package..."
           npm publish --access=public
+          
+      - name: Commit version update to repository
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json
+          git commit -m "chore: bump version to ${{ steps.version.outputs.VERSION }} [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:main
         
       - name: Update GitHub Pages documentation
         uses: actions/github-script@v7
