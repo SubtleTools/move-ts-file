@@ -25,7 +25,9 @@
     "**/coverage",
     "**/temp/**",
     "move-ts.js",
-    "move-ts.d.ts"
+    "move-ts.d.ts",
+    "docs/content/docs/api/**",
+    ".astro/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.93.0.wasm",
