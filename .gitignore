@@ -13,6 +13,7 @@ dist/
 
 # Test artifacts
 test/temp/
+test-cli/
 
 # Editor
 .vscode/
