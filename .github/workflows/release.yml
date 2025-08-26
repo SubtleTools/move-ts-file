@@ -22,8 +22,14 @@ jobs:
         with:
           bun-version: latest
           
-      - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+      - name: Install dependencies  
+        run: |
+          # Try bun install first (handles dependencies better for this project)
+          bun install --retry 3 || {
+            echo "Bun install failed, clearing cache and retrying..."
+            rm -rf node_modules ~/.bun/install/cache
+            bun install --retry 3
+          }
         
       - name: Run full test suite
         run: npm run prepack
@@ -51,7 +57,13 @@ jobs:
           bun-version: latest
           
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: |
+          # Try bun install first (handles dependencies better for this project)
+          bun install --retry 3 || {
+            echo "Bun install failed, clearing cache and retrying..."
+            rm -rf node_modules ~/.bun/install/cache
+            bun install --retry 3
+          }
         
       - name: Build for release
         run: npm run build
