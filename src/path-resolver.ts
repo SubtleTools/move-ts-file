@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import type { ImportTypeInfo, PackageImportsInfo, PathMappingInfo } from './types.js';
 
 /**
@@ -122,7 +122,7 @@ export class RelativePathResolver extends PathResolver {
     const fromDir = dirname(fromFile);
 
     // Calculate new relative path from the importing file to the new location
-    let newRelativePath = require('node:path').relative(fromDir, newPath);
+    let newRelativePath = relative(fromDir, newPath);
 
     // Convert Windows backslashes to forward slashes
     newRelativePath = newRelativePath.replace(/\\/g, '/');
