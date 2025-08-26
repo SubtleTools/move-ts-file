@@ -115,12 +115,12 @@ jobs:
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          echo "Setting up npm auth manually..."
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "Checking npm authentication..."
           npm whoami
-          echo "Current npm config:"
-          npm config list
           echo "Publishing package..."
           npm publish --access=public
         
